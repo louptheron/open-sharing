@@ -1,0 +1,12 @@
+TODO:
+
+When opening app for the first time you could :
+ - Join an existing group by entering a Node's invitation :
+        - If you are already in the group, you will enter your username/password, the app will
+        check if theses are valid, it will then show you files inside this one and ask you which to pull.
+        - If you are not in the group, it will ask you for a new username/password which is free and ask the sender of
+        the invitation.
+ - Create a new group, and send invitation.
+
+ When opening the app :
+ - Show all groups
