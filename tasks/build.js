@@ -129,7 +129,6 @@ gulp.task('finalize', ['clean'], function () {
     destDir.write('package.json', manifest);
 });
 
-
 gulp.task('watch', function () {
     gulp.watch('app/**/*.js', ['bundle-watch']);
     gulp.watch(paths.copyFromAppDir, { cwd: 'app' }, ['copy-watch']);

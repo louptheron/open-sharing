@@ -3,6 +3,12 @@
 // It doesn't have any windows which you can see on screen, but we can open
 // window from here.
 
+import userDB from './models/user';
+import groupDB from './models/group';
+import * as utils from './controllers/utils';
+import * as server from './controllers/server';
+import * as client from './controllers/client';
+
 import { app, BrowserWindow } from 'electron';
 import devHelper from './vendor/electron_boilerplate/dev_helper';
 import windowStateKeeper from './vendor/electron_boilerplate/window_state';
@@ -38,9 +44,13 @@ app.on('ready', function () {
         mainWindow.loadURL('file://' + __dirname + '/app.html');
     }
 
+    console.log(utils.getInternalIp());
+    server;
+    client;
+
     if (env.name !== 'production') {
         devHelper.setDevMenu();
-        mainWindow.openDevTools();
+        //mainWindow.openDevTools();
     }
 
     mainWindow.on('close', function () {

@@ -1,6 +1,3 @@
-/**
- * Created by distohm on 08/12/15.
- */
 'use strict';
 
 var app = require('app');
