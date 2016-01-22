@@ -1,6 +1,6 @@
 {
-  "name": "electron-boilerplate",
-  "productName": "Electron Boilerplate",
+  "name": "open-sharing",
+  "productName": "Open Sharing",
   "identifier": "com.example.electron-boilerplate",
   "description": "Starter for your Electron application. Out of the box ready for serious stuff.",
   "version": "0.1.0",

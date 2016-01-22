@@ -9,6 +9,7 @@ client.connect(1337, '127.0.0.1', function() {
     console.log('Connected');
     client.write('Hello, server! Love, Client.');
 
+    //
     fs.watch(utils.getUserDir(), function(event, filename) {
         console.log(`event is: ${event}`);
         if (filename) {
@@ -17,7 +18,6 @@ client.connect(1337, '127.0.0.1', function() {
             console.log('filename not provided');
         }
         fs.readFile(utils.getUserDir() + '/' + filename, function(err, data){
-            //broadcast(data, socket);
             client.write(data, 'binary');
         });
     });

@@ -4,31 +4,37 @@ var app = require('app');
 var Datastore = require('nedb');
 
 //load the Database
-var db = {};
-db.user = new Datastore({ filename: (app.getPath('appData') + '/' + app.getName() + '/user.db'), autoload: true });
+var user = new Datastore({ filename: (app.getPath('appData') + '/' + app.getName() + '/user.db'), autoload: true });
 
-module.exports.isNullDatabase = function () {
-    db.user.find({ username: { $exists: true } }, function (err, docs) {
+export function isNullDatabase() {
+    user.find({ username: { $exists: true } }, function (err, docs) {
+        if(!err)
+            return docs
     });
-};
+}
 
-module.exports.createUser = function (username, password) {
-    db.user.find({ username: username }, function (err, docs) {
-        if(docs){
+export function createUser(username, ip, port) {
+    user.count({ username: username }, function (err, count) {
+        if(count > 0){
+            console.log(count);
             return false;
         }
         else {
-            var doc = { username: username
-                , password: password
-                , ip: null
-                , notToBeSaved: undefined  // Will not be saved
-                , fruits: [ 'apple', 'orange', 'pear' ]
-                , infos: { name: 'nedb' }
+            var doc = {
+                username: username
+                , ip: ip
+                , port: port
+                , groups: [ 'apple', 'orange', 'pear' ]
             };
+            user.insert(doc, function (err) {
+                if(err){
+                    console.error('insert: Error when inserting', err);
+                }
+                else {
+                    console.log('user ' + doc.username + ' inserted.');
+                }
 
-            db.insert(doc, function (err) {
-                console.error('insert: Error when inserting', err.stack);
             });
         }
     });
-};
+}

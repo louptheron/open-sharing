@@ -3,8 +3,8 @@
 // It doesn't have any windows which you can see on screen, but we can open
 // window from here.
 
-import userDB from './models/user';
-import groupDB from './models/group';
+import * as userDB from './models/user';
+import * as groupDB from './models/group';
 import * as utils from './controllers/utils';
 import * as server from './controllers/server';
 import * as client from './controllers/client';
@@ -44,9 +44,7 @@ app.on('ready', function () {
         mainWindow.loadURL('file://' + __dirname + '/app.html');
     }
 
-    console.log(utils.getInternalIp());
-    server;
-    client;
+    console.log(userDB.createUser('loup', '127.0.0.1', '1337'));
 
     if (env.name !== 'production') {
         devHelper.setDevMenu();
