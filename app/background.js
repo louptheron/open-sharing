@@ -45,6 +45,7 @@ app.on('ready', function () {
     }
 
     console.log(userDB.createUser('loup', '127.0.0.1', '1337'));
+    console.log(utils.getSecretPhrase());
 
     if (env.name !== 'production') {
         devHelper.setDevMenu();

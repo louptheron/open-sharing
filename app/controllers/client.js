@@ -5,11 +5,10 @@ import * as fs from 'fs';
 import * as utils from './utils'
 
 var client = new net.Socket();
-client.connect(1337, '127.0.0.1', function() {
+client.connect(utils.port, '127.0.0.1', function() {
     console.log('Connected');
     client.write('Hello, server! Love, Client.');
 
-    //
     fs.watch(utils.getUserDir(), function(event, filename) {
         console.log(`event is: ${event}`);
         if (filename) {

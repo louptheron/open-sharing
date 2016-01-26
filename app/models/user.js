@@ -16,7 +16,6 @@ export function isNullDatabase() {
 export function createUser(username, ip, port) {
     user.count({ username: username }, function (err, count) {
         if(count > 0){
-            console.log(count);
             return false;
         }
         else {
@@ -24,7 +23,6 @@ export function createUser(username, ip, port) {
                 username: username
                 , ip: ip
                 , port: port
-                , groups: [ 'apple', 'orange', 'pear' ]
             };
             user.insert(doc, function (err) {
                 if(err){

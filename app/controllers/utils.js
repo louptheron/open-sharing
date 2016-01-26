@@ -1,6 +1,8 @@
 var os = require('os');
 var fs = require('fs');
 
+export var port = 1337;
+
 export function getExternalIp() {
     var interfaces = os.networkInterfaces();
     for (var k in interfaces) {
@@ -29,18 +31,22 @@ export function getUserDir() {
     return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'] + '/openSharing';
 }
 
-export function createUserDir(userDir) {
+export function createUserDir() {
     if(process.platform == "linux"){
-        if (!fs.existsSync(userDir)){
-            fs.mkdirSync(userDir);
+        if (!fs.existsSync(getUserDir())){
+            fs.mkdirSync(getUserDir());
         }
     }
 }
 
-export function userDirFiles(userDir){
-    fs.readdir(userDir, function(err, files){
+export function userDirFiles(){
+    fs.readdir(getUserDir(), function(err, files){
         if(!err)
             console.log(files);
     });
+}
+
+export function getSecretPhrase(){
+    return getExternalIp() + ':' + port;
 }
 
