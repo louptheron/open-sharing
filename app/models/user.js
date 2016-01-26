@@ -13,17 +13,18 @@ export function isNullDatabase() {
     });
 }
 
-export function createUser(username, ip, port, callback) {
+export function createUser(username, ip, port, me, callback) {
     user.count({ username: username }, function (err, count) {
         if(count > 0){
             if(callback)
-                return callback("user exist");
+                return callback("user already exist");
         }
         else {
             var doc = {
-                username: username
-                , ip: ip
-                , port: port
+                username: username,
+                ip: ip,
+                port: port,
+                me: me
             };
             user.insert(doc, function (err) {
                 if(err){

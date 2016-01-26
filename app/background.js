@@ -45,13 +45,11 @@ app.on('ready', function () {
         mainWindow.loadURL('file://' + __dirname + '/app.html');
     }
 
-    console.log(userDB.createUser('loup', '127.0.0.1', '1337'));
-
     ipcMain.on('emitAddUser', function(event, arg) {
         if(arg){
             arg = arg.split(':');
             if(arg.length == 3){
-                userDB.createUser(arg[0], arg[1], arg[2], function(res) {
+                userDB.createUser(arg[0], arg[1], arg[2], "false", function(res) {
                     if(res){
                         event.sender.send('responseAddUser', 'ERR: ' + res);
                     }
@@ -69,9 +67,25 @@ app.on('ready', function () {
         }
     });
 
+    ipcMain.on('emitSetUsername', function(event, arg) {
+        if(arg){
+            userDB.createUser(arg, utils.getInternalIp(), utils.port, "true", function(res) {
+                if(res){
+                    event.sender.send('responseSetUsername', 'ERR: ' + res);
+                }
+                else {
+                    event.sender.send('responseSetUsername', 'OK');
+                }
+            });
+        }
+        else {
+            event.sender.send('responseSetUsername', 'No Data');
+        }
+    });
+
     if (env.name !== 'production') {
         devHelper.setDevMenu();
-        //mainWindow.openDevTools();
+        mainWindow.openDevTools();
     }
 
     mainWindow.on('close', function () {

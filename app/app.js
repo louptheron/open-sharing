@@ -5,7 +5,7 @@
 import os from 'os'; // native node.js module
 import { remote } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
-import { secretPhraseBox, input } from './hello_world/hello_world'; // code authored by you in this project
+import { secretPhraseBox, inputSecretPhrase, inputUsername } from './hello_world/hello_world';
 import env from './env';
 const ipcRenderer = require('electron').ipcRenderer;
 
@@ -20,14 +20,25 @@ console.log('The author of this app is:', appDir.read('package.json', 'json').au
 
 document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('greet').innerHTML = secretPhraseBox();
-    document.getElementById('inputBox').innerHTML = input();
+    document.getElementById('inputBox').innerHTML = inputUsername();
     document.getElementById('env-name').innerHTML = env.name;
 
-    document.getElementById('buttonSecretPhrase').onclick = function() {
-        ipcRenderer.send('emitAddUser', document.getElementById('inputSecretPhrase').value);
+    document.getElementById('buttonUsername').onclick = function() {
+        ipcRenderer.send('emitSetUsername', document.getElementById('inputUsername').value);
     };
 
-    ipcRenderer.on("responseAddUser", function (event, msg) {
-        console.log("Add User : " + msg);
+    ipcRenderer.on("responseSetUsername", function (event, msg) {
+        console.log("Set Username : " + msg);
+        document.getElementById('inputBox').innerHTML = inputSecretPhrase();
     });
+
+    if(document.getElementById('buttonSecretPhrase')){
+        document.getElementById('buttonSecretPhrase').onclick = function() {
+            ipcRenderer.send('emitAddUser', document.getElementById('inputSecretPhrase').value);
+        };
+
+        ipcRenderer.on("responseAddUser", function (event, msg) {
+            console.log("Add User : " + msg);
+        });
+    }
 });
