@@ -12,6 +12,7 @@ import * as client from './controllers/client';
 import { app, BrowserWindow } from 'electron';
 import devHelper from './vendor/electron_boilerplate/dev_helper';
 import windowStateKeeper from './vendor/electron_boilerplate/window_state';
+const ipcMain = require('electron').ipcMain;
 
 // Special module holding environment variables which you declared
 // in config/env_xxx.json file.
@@ -45,7 +46,28 @@ app.on('ready', function () {
     }
 
     console.log(userDB.createUser('loup', '127.0.0.1', '1337'));
-    console.log(utils.getSecretPhrase());
+
+    ipcMain.on('emitAddUser', function(event, arg) {
+        if(arg){
+            arg = arg.split(':');
+            if(arg.length == 3){
+                userDB.createUser(arg[0], arg[1], arg[2], function(res) {
+                    if(res){
+                        event.sender.send('responseAddUser', 'ERR: ' + res);
+                    }
+                    else {
+                        event.sender.send('responseAddUser', 'OK');
+                    }
+                });
+            }
+            else {
+                event.sender.send('responseAddUser', 'Invalid Secret Phrase')
+            }
+        }
+        else {
+            event.sender.send('responseAddUser', 'No Data');
+        }
+    });
 
     if (env.name !== 'production') {
         devHelper.setDevMenu();

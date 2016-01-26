@@ -5,8 +5,9 @@
 import os from 'os'; // native node.js module
 import { remote } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
-import { greet } from './hello_world/hello_world'; // code authored by you in this project
+import { secretPhraseBox, input } from './hello_world/hello_world'; // code authored by you in this project
 import env from './env';
+const ipcRenderer = require('electron').ipcRenderer;
 
 console.log('Loaded environment variables:', env);
 
@@ -18,7 +19,15 @@ var appDir = jetpack.cwd(app.getAppPath());
 console.log('The author of this app is:', appDir.read('package.json', 'json').author);
 
 document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('greet').innerHTML = greet();
-    document.getElementById('platform-info').innerHTML = os.platform();
+    document.getElementById('greet').innerHTML = secretPhraseBox();
+    document.getElementById('inputBox').innerHTML = input();
     document.getElementById('env-name').innerHTML = env.name;
+
+    document.getElementById('buttonSecretPhrase').onclick = function() {
+        ipcRenderer.send('emitAddUser', document.getElementById('inputSecretPhrase').value);
+    };
+
+    ipcRenderer.on("responseAddUser", function (event, msg) {
+        console.log("Add User : " + msg);
+    });
 });

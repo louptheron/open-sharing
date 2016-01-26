@@ -13,10 +13,11 @@ export function isNullDatabase() {
     });
 }
 
-export function createUser(username, ip, port) {
+export function createUser(username, ip, port, callback) {
     user.count({ username: username }, function (err, count) {
         if(count > 0){
-            return false;
+            if(callback)
+                return callback("user exist");
         }
         else {
             var doc = {
@@ -26,10 +27,12 @@ export function createUser(username, ip, port) {
             };
             user.insert(doc, function (err) {
                 if(err){
-                    console.error('insert: Error when inserting', err);
+                    if(callback)
+                        return callback(err);
                 }
                 else {
-                    console.log('user ' + doc.username + ' inserted.');
+                    if(callback)
+                        return callback();
                 }
 
             });

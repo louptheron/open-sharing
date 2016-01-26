@@ -2,6 +2,7 @@ var os = require('os');
 var fs = require('fs');
 
 export var port = 1337;
+export var username = "loup";
 
 export function getExternalIp() {
     var interfaces = os.networkInterfaces();
@@ -47,6 +48,6 @@ export function userDirFiles(){
 }
 
 export function getSecretPhrase(){
-    return getExternalIp() + ':' + port;
+    return username + ':' + getExternalIp() + ':' + port;
 }
 
