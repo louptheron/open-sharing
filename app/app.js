@@ -19,7 +19,6 @@ var appDir = jetpack.cwd(app.getAppPath());
 console.log('The author of this app is:', appDir.read('package.json', 'json').author);
 
 document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('greet').innerHTML = secretPhraseBox();
     document.getElementById('inputBox').innerHTML = inputUsername();
     document.getElementById('env-name').innerHTML = env.name;
 
@@ -29,7 +28,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     ipcRenderer.on("responseSetUsername", function (event, msg) {
         console.log("Set Username : " + msg);
-        document.getElementById('inputBox').innerHTML = inputSecretPhrase();
+        if(msg.toString() == "OK"){
+            document.getElementById('inputBox').innerHTML = inputSecretPhrase();
+            document.getElementById('greet').innerHTML = secretPhraseBox();
+        }
     });
 
     if(document.getElementById('buttonSecretPhrase')){

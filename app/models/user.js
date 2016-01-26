@@ -13,6 +13,13 @@ export function isNullDatabase() {
     });
 }
 
+export function getMyUsername() {
+    user.find({ me: "true" }, function(err, docs) {
+        if(!err)
+            return docs
+    });
+}
+
 export function createUser(username, ip, port, me, callback) {
     user.count({ username: username }, function (err, count) {
         if(count > 0){
