@@ -6,10 +6,12 @@ var Datastore = require('nedb');
 //load the Database
 var user = new Datastore({ filename: (app.getPath('appData') + '/' + app.getName() + '/user.db'), autoload: true });
 
-export function isNullDatabase() {
-    user.find({ username: { $exists: true } }, function (err, docs) {
-        if(!err)
-            return docs
+export function countNumberOfMe(callback) {
+    user.count({me: "true"}, function (err, count) {
+        if(err)
+            return err;
+        else if (callback)
+            return callback(count);
     });
 }
 

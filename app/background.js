@@ -45,6 +45,16 @@ app.on('ready', function () {
         mainWindow.loadURL('file://' + __dirname + '/app.html');
     }
 
+    if(userDB.getMyUsername()){
+        console.log("DB exist");
+    }
+
+    userDB.countNumberOfMe(function(count){
+        ipcMain.on('isUsernameDB', function(event){
+            event.sender.send('isUsernameDB', count);
+        });
+    });
+
     ipcMain.on('emitAddUser', function(event, arg) {
         if(arg){
             arg = arg.split(':');
