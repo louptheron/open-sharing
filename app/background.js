@@ -19,7 +19,9 @@ var menubar = require('menubar');
 // in config/env_xxx.json file.
 import env from './env';
 
-var mb = menubar();
+var menubarOptions = {width:400, height:100};
+
+var mb = menubar(menubarOptions);
 var mainWindow;
 
 // Preserver of the window size and position between app launches.
@@ -28,84 +30,83 @@ var mainWindowState = windowStateKeeper('main', {
     height: 600
 });
 
-    mb.on('ready', function ready () {
+mb.on('ready', function ready () {
+    mainWindow = new BrowserWindow({
+        x: mainWindowState.x,
+        y: mainWindowState.y,
+        width: mainWindowState.width,
+        height: mainWindowState.height
+    });
 
-        mainWindow = new BrowserWindow({
-            x: mainWindowState.x,
-            y: mainWindowState.y,
-            width: mainWindowState.width,
-            height: mainWindowState.height
+    if (mainWindowState.isMaximized) {
+        mainWindow.maximize();
+    }
+
+    if (env.name === 'test') {
+        mainWindow.loadURL('file://' + __dirname + '/spec.html');
+    } else {
+        mainWindow.loadURL('file://' + __dirname + '/app.html');
+    }
+
+
+    if(userDB.getMyUsername()){
+        console.log("DB exist");
+    }
+
+    userDB.countNumberOfMe(function(count){
+        ipcMain.on('isUsernameDB', function(event){
+            event.sender.send('isUsernameDB', count);
         });
+    });
 
-        if (mainWindowState.isMaximized) {
-            mainWindow.maximize();
-        }
-
-        if (env.name === 'test') {
-            mainWindow.loadURL('file://' + __dirname + '/spec.html');
-        } else {
-            mainWindow.loadURL('file://' + __dirname + '/app.html');
-        }
-
-
-        if(userDB.getMyUsername()){
-            console.log("DB exist");
-        }
-
-        userDB.countNumberOfMe(function(count){
-            ipcMain.on('isUsernameDB', function(event){
-                event.sender.send('isUsernameDB', count);
-            });
-        });
-
-        ipcMain.on('emitAddUser', function(event, arg) {
-            if(arg){
-                arg = arg.split(':');
-                if(arg.length == 3){
-                    userDB.createUser(arg[0], arg[1], arg[2], "false", function(res) {
-                        if(res){
-                            event.sender.send('responseAddUser', 'ERR: ' + res);
-                        }
-                        else {
-                            event.sender.send('responseAddUser', 'OK');
-                        }
-                    });
-                }
-                else {
-                    event.sender.send('responseAddUser', 'Invalid Secret Phrase')
-                }
-            }
-            else {
-                event.sender.send('responseAddUser', 'No Data');
-            }
-        });
-
-
-        ipcMain.on('emitSetUsername', function(event, arg) {
-            if(arg){
-                userDB.createUser(arg, utils.getInternalIp(), utils.port, "true", function(res) {
+    ipcMain.on('emitAddUser', function(event, arg) {
+        if(arg){
+            arg = arg.split(':');
+            if(arg.length == 3){
+                userDB.createUser(arg[0], arg[1], arg[2], "false", function(res) {
                     if(res){
-                        event.sender.send('responseSetUsername', 'ERR: ' + res);
+                        event.sender.send('responseAddUser', 'ERR: ' + res);
                     }
                     else {
-                        event.sender.send('responseSetUsername', 'OK');
+                        event.sender.send('responseAddUser', 'OK');
                     }
                 });
             }
             else {
-                event.sender.send('responseSetUsername', 'No Data');
+                event.sender.send('responseAddUser', 'Invalid Secret Phrase')
             }
-        });
-
-        if (env.name !== 'production') {
-            devHelper.setDevMenu();
-            mainWindow.openDevTools();
         }
-
-        mainWindow.on('close', function () {
-            mainWindowState.saveState(mainWindow);
-        });
+        else {
+            event.sender.send('responseAddUser', 'No Data');
+        }
     });
+
+
+    ipcMain.on('emitSetUsername', function(event, arg) {
+        if(arg){
+            userDB.createUser(arg, utils.getInternalIp(), utils.port, "true", function(res) {
+                if(res){
+                    event.sender.send('responseSetUsername', 'ERR: ' + res);
+                }
+                else {
+                    event.sender.send('responseSetUsername', 'OK');
+                }
+            });
+        }
+        else {
+            event.sender.send('responseSetUsername', 'No Data');
+        }
+    });
+
+    if (env.name !== 'production') {
+        devHelper.setDevMenu();
+        mainWindow.openDevTools();
+    }
+
+    mainWindow.on('close', function () {
+        mainWindowState.saveState(mainWindow);
+    });
+});
 
 
 
