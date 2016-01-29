@@ -48,7 +48,6 @@ mb.on('ready', function ready () {
         mainWindow.loadURL('file://' + __dirname + '/app.html');
     }
 
-
     if(userDB.getMyUsername()){
         console.log("DB exist");
     }
@@ -96,6 +95,14 @@ mb.on('ready', function ready () {
         else {
             event.sender.send('responseSetUsername', 'No Data');
         }
+    });
+
+    ipcMain.on('secretPhrase', function(event) {
+        userDB.getMyUsername(function(username) {
+            if(username){
+                event.sender.send('secretPhrase', username + utils.getSecretPhrase());
+            }
+        });
     });
 
     if (env.name !== 'production') {

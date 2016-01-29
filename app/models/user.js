@@ -15,10 +15,11 @@ export function countNumberOfMe(callback) {
     });
 }
 
-export function getMyUsername() {
-    user.find({ me: "true" }, function(err, docs) {
-        if(!err)
-            return docs
+export function getMyUsername(callback) {
+    user.findOne({ me: "true" }, function(err, docs) {
+        if (callback) {
+            return callback(docs.username);
+        }
     });
 }
 

@@ -5,7 +5,7 @@
 import os from 'os'; // native node.js module
 import { remote } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
-import { secretPhraseBox, inputSecretPhrase, inputUsername } from './hello_world/hello_world';
+import { inputSecretPhrase, inputUsername } from './hello_world/hello_world';
 import env from './env';
 const ipcRenderer = require('electron').ipcRenderer;
 
@@ -18,7 +18,11 @@ var usernameSetAtStartup = false;
 
 function addUser(){
     document.getElementById('inputBox').innerHTML = inputSecretPhrase();
-    document.getElementById('greet').innerHTML = secretPhraseBox();
+
+    ipcRenderer.send('secretPhrase');
+    ipcRenderer.on('secretPhrase', function(event, msg) {
+        document.getElementById('greet').innerHTML = 'Your secret phrase to share :</br>"' + msg + "\"";
+    });
 
     document.getElementById('buttonSecretPhrase').onclick = function() {
         ipcRenderer.send('emitAddUser', document.getElementById('inputSecretPhrase').value);
