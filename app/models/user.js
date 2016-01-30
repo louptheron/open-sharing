@@ -15,6 +15,16 @@ export function countNumberOfMe(callback) {
     });
 }
 
+export function getFirstUserIp(callback) {
+    user.findOne({ me: "false" }, function(err, docs) {
+        if(docs){
+            if (callback) {
+                return callback(docs.ip);
+            }
+        }
+    });
+}
+
 export function getMyUsername(callback) {
     user.findOne({ me: "true" }, function(err, docs) {
         if (callback) {
