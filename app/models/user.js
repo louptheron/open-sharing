@@ -9,14 +9,29 @@ var user = new Datastore({ filename: (app.getPath('appData') + '/' + app.getName
 export function isNullDatabase() {
     user.find({ username: { $exists: true } }, function (err, docs) {
         if(!err)
-            return docs
+            return docs;
     });
 }
 
-export function getMyUsername() {
-    user.find({ me: "true" }, function(err, docs) {
-        if(!err)
-            return docs
+export function getMyUsername(callback) {
+    user.find({me: 'true'  }, function(err, docs) {
+        if(!err){
+            return callback(docs);
+        }
+        else{
+            return callback(err);
+        }
+    });
+}
+
+export function removeUser(username,callback){
+    user.remove({ username: username }, {}, function (err) {
+        if(!err){
+            return callback();
+        }
+        else{
+            return callback(err);
+        }
     });
 }
 

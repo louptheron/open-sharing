@@ -5,7 +5,7 @@
 import os from 'os'; // native node.js module
 import { remote } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
-import { secretPhraseBox, inputSecretPhrase, inputUsername } from './hello_world/hello_world';
+import { secretPhraseBox, inputSecretPhrase, inputUsername ,getUsernames,inputCreateGroup} from './hello_world/hello_world';
 import env from './env';
 const ipcRenderer = require('electron').ipcRenderer;
 
@@ -26,21 +26,56 @@ document.addEventListener('DOMContentLoaded', function () {
         ipcRenderer.send('emitSetUsername', document.getElementById('inputUsername').value);
     };
 
+    document.getElementById('buttonShowUsers').onclick = function() {
+        ipcRenderer.send('emitGetUsers','ok');
+    };
+
+    document.getElementById('buttonCreateGroup').onclick = function() {
+        document.getElementById('inputBox').innerHTML = inputCreateGroup();
+
+        document.getElementById('buttonGroupName').onclick = function() {
+            ipcRenderer.send('emitAddGroup', document.getElementById('inputGroupName').value);
+        };
+
+        ipcRenderer.on("responseAddGroup", function (event, msg) {
+            console.log("Add User : " + msg);
+        });
+    };
+
+    ipcRenderer.on("responseGetUsers", function (event, arg) {
+        if(arg){
+            document.getElementById('MainContent').innerHTML ='<table><tr><thead><th>Name</th><th>Delete</th><thead></tr>'+getUsernames(arg)+'</table>';
+            for(var k in arg){
+                document.getElementById(arg[k].username).onclick = function() {
+                    ipcRenderer.send('emitDeleteUser',this.id);
+                };
+            }
+        }
+    });
+
+    ipcRenderer.on("responseDeleteUser",function(event,msg){
+        if(msg.toString() == "OK"){
+            console.log("delete : "+msg);
+            ipcRenderer.send('emitGetUsers','ok');
+        }
+        else{
+            console.log(msg);
+        }
+    });
+
     ipcRenderer.on("responseSetUsername", function (event, msg) {
         console.log("Set Username : " + msg);
         if(msg.toString() == "OK"){
             document.getElementById('inputBox').innerHTML = inputSecretPhrase();
             document.getElementById('greet').innerHTML = secretPhraseBox();
+
+            document.getElementById('buttonSecretPhrase').onclick = function() {
+                ipcRenderer.send('emitAddUser', document.getElementById('inputSecretPhrase').value);
+            };
+
+            ipcRenderer.on("responseAddUser", function (event, msg) {
+                console.log("Add User : " + msg);
+            });
         }
     });
-
-    if(document.getElementById('buttonSecretPhrase')){
-        document.getElementById('buttonSecretPhrase').onclick = function() {
-            ipcRenderer.send('emitAddUser', document.getElementById('inputSecretPhrase').value);
-        };
-
-        ipcRenderer.on("responseAddUser", function (event, msg) {
-            console.log("Add User : " + msg);
-        });
-    }
 });

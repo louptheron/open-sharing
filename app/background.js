@@ -67,6 +67,34 @@ app.on('ready', function () {
         }
     });
 
+    ipcMain.on('emitGetUsers', function(event,arg) {
+        if(arg.toString()=='ok'){
+            userDB.getMyUsername(function(res){
+                event.sender.send('responseGetUsers', res);
+            });
+        }
+        else{
+            event.sender.send('responseGetUsers', 'No Data');
+        }
+    });
+
+    ipcMain.on('emitDeleteUser', function(event,arg) {
+        if(arg){
+            userDB.removeUser(arg,function(res){
+                if(res){
+                    event.sender.send('responseDeleteUser','ERR'+ res);
+                }
+                else{
+                    event.sender.send('responseDeleteUser', 'OK');
+                }
+            });
+        }
+        else{
+            event.sender.send('responseDeleteUser', 'No Data');
+        }
+    });
+
+
     ipcMain.on('emitSetUsername', function(event, arg) {
         if(arg){
             userDB.createUser(arg, utils.getInternalIp(), utils.port, "true", function(res) {
@@ -80,6 +108,22 @@ app.on('ready', function () {
         }
         else {
             event.sender.send('responseSetUsername', 'No Data');
+        }
+    });
+
+    ipcMain.on('emitAddGroup', function(event, arg) {
+        if(arg){
+            groupDB.createGroup(arg,function(res) {
+                if(res){
+                    event.sender.send('responseAddGroup', 'ERR: ' + res);
+                }
+                else {
+                    event.sender.send('responseAddGroup', 'OK');
+                }
+            });
+        }
+        else {
+            event.sender.send('responseAddGroup', 'No Data');
         }
     });
 
