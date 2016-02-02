@@ -4,23 +4,57 @@
     <meta charset="utf-8">
     <title>Open Sharing</title>
 
-    <link href="./stylesheets/main.css" rel="stylesheet" type="text/css">
     <link href="./css/materialize.css" rel="stylesheet" type="text/css">
-
-    <script src="vendor/electron_boilerplate/context_menu.js"></script>
-    <script src="vendor/electron_boilerplate/external_links.js"></script>
-
-    <script src="app.js"></script>
+    <link href="./css/design.css" rel="stylesheet" type="text/css">
 </head>
 <body>
+<header>
+    <nav>
+        <div class="nav-wrapper blue darken-1">
+            <a href="#" class="brand-logo">Open Sharing</a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li><a href="sass.html">Mon Compte</a></li>
+                <li><a href="collapsible.html">Aide</a></li>
+            </ul>
+        </div>
+    </nav>
+</header>
+<!-- Page Layout here -->
+<main>
+    <div class="row">
+        <div class="col s12 m4 l3  blue lighten-5 full_height"> <!-- Note that "m4 l3" was added -->
+            <h5>Groups</h5>
+            <p id="inputBox"></p>
+            <button>Create a group</button>
+        </div>
 
-    <div class="container">
-        <h1>Open Sharing</h1>
-        <h6 id="greet"></h6>
-        <p id="inputBox"></p>
-        <p class="subtitle">
-        </p>
+        <div class="col s12 m8 l9"> <!-- Note that "m8 l9" was added -->
+            <div class="">
+                <h2>Groups</h2>
+            </div>
+
+        </div>
     </div>
+</main>
+<footer class="page-footer blue darken-1">
+    <div class="container">
+        <div class="row">
+            <div class="col l12 s12">
+                <h5 id="greet"></h5>
+            </div>
+        </div>
+    </div>
+    <div class="footer-copyright">
+        <div class="container">
+            © 2015 Open Sharing
+        </div>
+    </div>
+</footer>
+<script src="vendor/electron_boilerplate/context_menu.js"></script>
+<script src="vendor/electron_boilerplate/external_links.js"></script>
+<script src="app.js"></script>
+<script src="js/jquery-2.1.4.min.js"></script>
+<script src="js/materialize.js"></script>
 
 </body>
 </html>

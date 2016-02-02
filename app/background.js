@@ -119,9 +119,9 @@ mb.on('ready', function ready () {
         persistent: true
     });
 
-// Something to use when events are received.
+    // Something to use when events are received.
     var log = console.log.bind(console);
-// Add event listeners.
+    // Add event listeners.
     watcher
         .on('add', path => log(`File ${path} has been added`))
         .on('change', function(path) {
@@ -146,47 +146,13 @@ mb.on('ready', function ready () {
                 });
             });
         })
-        .on('unlink', path => log(`File ${path} has been removed`));
-
-// More possible events.
-    watcher
+        .on('unlink', path => log(`File ${path} has been removed`))
         .on('addDir', path => log(`Directory ${path} has been added`))
         .on('unlinkDir', path => log(`Directory ${path} has been removed`))
         .on('error', error => log(`Watcher error: ${error}`))
         .on('ready', () => log('Initial scan complete. Ready for changes'));
 
-    /*fs.watch(utils.getUserDir(), function(event, filename) {
-        console.log(`event is: ${event}`);
-        if (filename) {
-            console.log(`filename provided: ${filename}`);
-        } else {
-            console.log('filename not provided');
-        }
-        fs.readFile(utils.getUserDir() + '/' + filename, function(err, data){
-            var client = new net.Socket();
-            userDB.getFirstUserIp(function(ip) {
-                if(ip != null){
-                    client.connect(utils.port, "localhost", function() {
-                        console.log('Connected');
-                        client.write(data, 'binary');
-                    });
-
-                    client.on('data', function(data) {
-                        console.log('Received: ' + data);
-                        //client.destroy(); // kill client after server's response
-                    });
-
-                    client.on('close', function() {
-                        console.log('Connection closed');
-                    });
-                }
-            });
-        });
-    });*/
-
-
-
-    mainWindow.on('close', function () {
+       mainWindow.on('close', function () {
         mainWindowState.saveState(mainWindow);
     });
 });

@@ -20,6 +20,8 @@ var paths = {
         './vendor/**',
         './**/*.html',
         './**/*.css',
+        './js/**',
+        './font/**',
         './**/*.+(jpg|png|svg)'
     ],
 }
