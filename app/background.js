@@ -16,6 +16,7 @@ import devHelper from './vendor/electron_boilerplate/dev_helper';
 import windowStateKeeper from './vendor/electron_boilerplate/window_state';
 const ipcMain = require('electron').ipcMain;
 var menubar = require('menubar');
+var chokidar = require('chokidar');
 
 // Special module holding environment variables which you declared
 // in config/env_xxx.json file.
@@ -100,9 +101,9 @@ mb.on('ready', function ready () {
     });
 
     ipcMain.on('secretPhrase', function(event) {
-        userDB.getMyUsername(function(username) {
-            if(username){
-                event.sender.send('secretPhrase', username + utils.getSecretPhrase());
+        userDB.getMyUsername(function(doc) {
+            if(doc){
+                event.sender.send('secretPhrase', doc.username + utils.getSecretPhrase());
             }
         });
     });
@@ -112,36 +113,78 @@ mb.on('ready', function ready () {
         mainWindow.openDevTools();
     }
 
-    var client = new net.Socket();
-    userDB.getFirstUserIp(function(ip) {
-        if(ip != null){
-            client.connect(utils.port, ip, function() {
-                console.log('Connected');
-                client.write('Hello, server! Love, Client.');
+    // Initialize watcher.
+    var watcher = chokidar.watch(utils.getUserDir(), {
+        ignored: /[\/\\]\./,
+        persistent: true
+    });
 
-                fs.watch(utils.getUserDir(), function(event, filename) {
-                    console.log(`event is: ${event}`);
-                    if (filename) {
-                        console.log(`filename provided: ${filename}`);
-                    } else {
-                        console.log('filename not provided');
+// Something to use when events are received.
+    var log = console.log.bind(console);
+// Add event listeners.
+    watcher
+        .on('add', path => log(`File ${path} has been added`))
+        .on('change', function(path) {
+            fs.readFile(path, function (err, data) {
+                var client = new net.Socket();
+                userDB.getFirstUserIp(function (ip) {
+                    if (ip != null) {
+                        client.connect(utils.port, "localhost", function () {
+                            console.log('Connected');
+                            client.write(data, 'binary');
+                        });
+
+                        client.on('data', function (data) {
+                            console.log('Received: ' + data);
+                            //client.destroy(); // kill client after server's response
+                        });
+
+                        client.on('close', function () {
+                            console.log('Connection closed');
+                        });
                     }
-                    fs.readFile(utils.getUserDir() + '/' + filename, function(err, data){
-                        client.write(data, 'binary');
-                    });
                 });
             });
+        })
+        .on('unlink', path => log(`File ${path} has been removed`));
 
-            client.on('data', function(data) {
-                console.log('Received: ' + data);
-                //client.destroy(); // kill client after server's response
-            });
+// More possible events.
+    watcher
+        .on('addDir', path => log(`Directory ${path} has been added`))
+        .on('unlinkDir', path => log(`Directory ${path} has been removed`))
+        .on('error', error => log(`Watcher error: ${error}`))
+        .on('ready', () => log('Initial scan complete. Ready for changes'));
 
-            client.on('close', function() {
-                console.log('Connection closed');
-            });
+    /*fs.watch(utils.getUserDir(), function(event, filename) {
+        console.log(`event is: ${event}`);
+        if (filename) {
+            console.log(`filename provided: ${filename}`);
+        } else {
+            console.log('filename not provided');
         }
-    });
+        fs.readFile(utils.getUserDir() + '/' + filename, function(err, data){
+            var client = new net.Socket();
+            userDB.getFirstUserIp(function(ip) {
+                if(ip != null){
+                    client.connect(utils.port, "localhost", function() {
+                        console.log('Connected');
+                        client.write(data, 'binary');
+                    });
+
+                    client.on('data', function(data) {
+                        console.log('Received: ' + data);
+                        //client.destroy(); // kill client after server's response
+                    });
+
+                    client.on('close', function() {
+                        console.log('Connection closed');
+                    });
+                }
+            });
+        });
+    });*/
+
+
 
     mainWindow.on('close', function () {
         mainWindowState.saveState(mainWindow);

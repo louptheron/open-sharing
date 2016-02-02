@@ -28,7 +28,7 @@ export function getFirstUserIp(callback) {
 export function getMyUsername(callback) {
     user.findOne({ me: "true" }, function(err, docs) {
         if (callback) {
-            return callback(docs.username);
+            return callback(docs);
         }
     });
 }
