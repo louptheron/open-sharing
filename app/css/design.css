@@ -22,3 +22,23 @@ main {
 .full_height {
     min-height: 50vh;
 }
+
+input::-webkit-input-placeholder {
+    color: black !important;
+}
+
+input:-moz-placeholder { /* Firefox 18- */
+    color: black !important;
+}
+
+input::-moz-placeholder {  /* Firefox 19+ */
+    color: black !important;
+}
+
+input:-ms-input-placeholder {
+    color: black !important;
+}
+
+input {
+    max-width: 60%;
+}

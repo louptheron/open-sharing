@@ -2,12 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4b74e398-b6e1-434f-b6f7-078712eb0b24" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/app/css/design.css" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/app.html" afterPath="$PROJECT_DIR$/app/app.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/app.js" afterPath="$PROJECT_DIR$/app/app.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/background.js" afterPath="$PROJECT_DIR$/app/background.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tasks/build.js" afterPath="$PROJECT_DIR$/tasks/build.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/hello_world/hello_world.js" afterPath="$PROJECT_DIR$/app/hello_world/hello_world.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/css/design.css" afterPath="$PROJECT_DIR$/app/css/design.css" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="electron-boilerplate.iws" />
@@ -41,11 +37,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="app.html" pinned="false" current-in-tab="false">
+      <file leaf-file-name="app.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/app.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-3.3333333">
-              <caret line="14" column="67" selection-start-line="14" selection-start-column="67" selection-end-line="14" selection-end-column="67" />
+            <state vertical-scroll-proportion="0.5">
+              <caret line="31" column="16" selection-start-line="31" selection-start-column="16" selection-end-line="31" selection-end-column="16" />
               <folding />
             </state>
           </provider>
@@ -81,11 +77,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="design.css" pinned="false" current-in-tab="true">
+      <file leaf-file-name="design.css" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/css/design.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.6197183">
-              <caret line="22" column="17" selection-start-line="22" selection-start-column="17" selection-end-line="22" selection-end-column="17" />
+            <state vertical-scroll-proportion="-2.3157895">
+              <caret line="21" column="14" selection-start-line="21" selection-start-column="14" selection-end-line="21" selection-end-column="14" />
               <folding />
             </state>
           </provider>
@@ -155,8 +151,8 @@
         <option value="$PROJECT_DIR$/build/app.html" />
         <option value="$PROJECT_DIR$/app/hello_world/hello_world.js" />
         <option value="$PROJECT_DIR$/app/app.js" />
-        <option value="$PROJECT_DIR$/app/app.html" />
         <option value="$PROJECT_DIR$/app/css/design.css" />
+        <option value="$PROJECT_DIR$/app/app.html" />
       </list>
     </option>
   </component>
@@ -801,8 +797,8 @@
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="n#!!doc" expanded="true" />
-            <marker date="1454445286474" expanded="true" signature="-1:-1" placeholder="..." />
-            <marker date="1454445286474" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1454446145816" expanded="true" signature="-1:-1" placeholder="..." />
+            <marker date="1454446145816" expanded="true" signature="-1:-1" placeholder="..." />
           </folding>
         </state>
       </provider>
@@ -839,14 +835,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/hello_world/hello_world.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="3" column="118" selection-start-line="3" selection-start-column="100" selection-end-line="3" selection-end-column="118" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/hello_world/hello_universe.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -863,18 +851,26 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/app.html">
+    <entry file="file://$PROJECT_DIR$/app/hello_world/hello_world.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-3.3333333">
-          <caret line="14" column="67" selection-start-line="14" selection-start-column="67" selection-end-line="14" selection-end-column="67" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="3" column="118" selection-start-line="3" selection-start-column="100" selection-end-line="3" selection-end-column="118" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/css/design.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6197183">
-          <caret line="22" column="17" selection-start-line="22" selection-start-column="17" selection-end-line="22" selection-end-column="17" />
+        <state vertical-scroll-proportion="-2.3157895">
+          <caret line="21" column="14" selection-start-line="21" selection-start-column="14" selection-end-line="21" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/app.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.5">
+          <caret line="31" column="16" selection-start-line="31" selection-start-column="16" selection-end-line="31" selection-end-column="16" />
           <folding />
         </state>
       </provider>
