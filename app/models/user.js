@@ -13,13 +13,29 @@ export function isNullDatabase() {
     });
 }
 
-export function getMyUsername(callback) {
-    user.find({me: 'true'  }, function(err, docs) {
-        if(!err){
+export function getUser(callback) {
+    user.findOne({me: "true"}, function (err, docs) {
+        if (callback) {
             return callback(docs);
         }
-        else{
-            return callback(err);
+    });
+}
+
+export function countNumberOfMe(callback) {
+    user.count({me: "true"}, function (err, count) {
+        if(err)
+            return err;
+        else if (callback)
+            return callback(count);
+    });
+}
+
+export function getFirstUserIp(callback) {
+    user.findOne({ me: "false" }, function(err, docs) {
+        if(docs){
+            if (callback) {
+                return callback(docs.ip);
+            }
         }
     });
 }

@@ -18,7 +18,6 @@ var paths = {
     copyFromAppDir: [
         './node_modules/**',
         './vendor/**',
-        './models/**',
         './**/*.html',
         './**/*.css',
         './**/*.+(jpg|png|svg)'
@@ -61,7 +60,7 @@ var bundle = function (src, dest) {
         var isolatedCode = '(function () {' + result.code + '\n}());';
         return Q.all([
             destDir.writeAsync(dest, isolatedCode + '\n//# sourceMappingURL=' + jsFile + '.map'),
-            destDir.writeAsync(dest + '.map', result.map.toString()),
+            destDir.writeAsync(dest + '.map', result.map.toString())
         ]);
     }).then(function () {
         deferred.resolve();
@@ -74,7 +73,6 @@ var bundle = function (src, dest) {
 
 var bundleApplication = function () {
     return Q.all([
-        bundle(srcDir.path('background.js'), destDir.path('background.js')),
         bundle(srcDir.path('background.js'), destDir.path('background.js')),
         bundle(srcDir.path('app.js'), destDir.path('app.js')),
     ]);
