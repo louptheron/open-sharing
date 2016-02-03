@@ -21,7 +21,7 @@ function addUser(){
 
     ipcRenderer.send('secretPhrase');
     ipcRenderer.on('secretPhrase', function(event, msg) {
-        document.getElementById('greet').innerHTML = 'Your secret phrase to share :</br>"' + msg + "\"";
+        document.getElementById('greet').innerHTML = 'Your secret phrase to share : "' + msg + "\"";
     });
 
     document.getElementById('buttonSecretPhrase').onclick = function() {

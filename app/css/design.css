@@ -1,0 +1,44 @@
+body {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+
+#inputSecretPhrase {
+    position: relative;
+    float: left;
+}
+
+#buttonSecretPhrase {
+    position: relative;
+    float: right;
+}
+
+.full_height {
+    min-height: 50vh;
+}
+
+input::-webkit-input-placeholder {
+    color: black !important;
+}
+
+input:-moz-placeholder { /* Firefox 18- */
+    color: black !important;
+}
+
+input::-moz-placeholder {  /* Firefox 19+ */
+    color: black !important;
+}
+
+input:-ms-input-placeholder {
+    color: black !important;
+}
+
+input {
+    max-width: 60%;
+}

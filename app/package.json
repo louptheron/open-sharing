@@ -8,6 +8,7 @@
   "copyright": "© 2016, your company here",
   "main": "background.js",
   "dependencies": {
+    "chokidar": "^1.4.2",
     "fs-jetpack": "^0.7.0",
     "menubar": "^3.0.0",
     "nedb": "^1.7.1"
