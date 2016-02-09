@@ -34,22 +34,10 @@ var mainWindowState = windowStateKeeper('main', {
 });
 
 mb.on('ready', function ready () {
-    mainWindow = new BrowserWindow({
-        x: mainWindowState.x,
-        y: mainWindowState.y,
-        width: mainWindowState.width,
-        height: mainWindowState.height
+
+    mb.on('after-create-window', function(){
+        mb.window.openDevTools();
     });
-
-    if (mainWindowState.isMaximized) {
-        mainWindow.maximize();
-    }
-
-    if (env.name === 'test') {
-        mainWindow.loadURL('file://' + __dirname + '/spec.html');
-    } else {
-        mainWindow.loadURL('file://' + __dirname + '/app.html');
-    }
 
     if(userDB.getMyUsername()){
         console.log("DB exist");
@@ -83,6 +71,34 @@ mb.on('ready', function ready () {
         }
     });
 
+    ipcMain.on('openApp', function(event, arg) {
+        mainWindow = new BrowserWindow({
+            x: mainWindowState.x,
+            y: mainWindowState.y,
+            width: mainWindowState.width,
+            height: mainWindowState.height
+        });
+
+        if (mainWindowState.isMaximized) {
+            mainWindow.maximize();
+        }
+
+        if (env.name === 'test') {
+            mainWindow.loadURL('file://' + __dirname + '/spec.html');
+        } else {
+            mainWindow.loadURL('file://' + __dirname + '/app.html');
+        }
+
+        if (env.name !== 'production') {
+            devHelper.setDevMenu();
+            mainWindow.openDevTools();
+        }
+    });
+
+    ipcMain.on('quitApp', function(){
+        mainWindowState.saveState(mainWindow);
+        app.quit();
+    });
 
     ipcMain.on('emitSetUsername', function(event, arg) {
         if(arg){
@@ -108,11 +124,6 @@ mb.on('ready', function ready () {
         });
     });
 
-    if (env.name !== 'production') {
-        devHelper.setDevMenu();
-        mainWindow.openDevTools();
-    }
-
     // Initialize watcher.
     var watcher = chokidar.watch(utils.getUserDir(), {
         ignored: /[\/\\]\./,
@@ -134,11 +145,6 @@ mb.on('ready', function ready () {
                             client.write(data, 'binary');
                         });
 
-                        client.on('data', function (data) {
-                            console.log('Received: ' + data);
-                            //client.destroy(); // kill client after server's response
-                        });
-
                         client.on('close', function () {
                             console.log('Connection closed');
                         });
@@ -152,9 +158,12 @@ mb.on('ready', function ready () {
         .on('error', error => log(`Watcher error: ${error}`))
         .on('ready', () => log('Initial scan complete. Ready for changes'));
 
-       mainWindow.on('close', function () {
-        mainWindowState.saveState(mainWindow);
-    });
+    if(mainWindow){
+        mainWindow.on('close', function () {
+            mainWindowState.saveState(mainWindow);
+        });
+    }
+
 });
 
 
