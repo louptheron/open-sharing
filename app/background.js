@@ -94,6 +94,14 @@ mb.on('ready', function ready () {
         }
     });
 
+    ipcMain.on('emitGetGroups', function(event) {
+        groupDB.getAllGroups(function(res){
+            if(res){
+                event.sender.send('responseGetGroups',res);
+            }
+        });
+    });
+
     ipcMain.on('emitDeleteUser', function(event,arg) {
         if(arg){
             userDB.removeUser(arg,function(res){

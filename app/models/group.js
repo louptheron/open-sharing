@@ -6,6 +6,17 @@ var Datastore = require('nedb');
 //load the Database
 var groups = new Datastore({ filename: (app.getPath('appData') + '/' + app.getName() + '/groups.db'), autoload: true });
 
+export function getAllGroups(callback) {
+    groups.find({}, function(err, docs) {
+        if(!err){
+            return callback(docs);
+        }
+        else{
+            return callback(err);
+        }
+    });
+}
+
 export function getGroup(groupname,callback) {
    groups.find({ groupname: groupname }, function(err, docs) {
         if(!err){

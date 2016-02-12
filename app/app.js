@@ -5,7 +5,7 @@
 import os from 'os'; // native node.js module
 import { remote } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
-import { inputSecretPhrase, inputUsername , getUsernames, inputCreateGroup} from './hello_world/hello_world';
+import { inputSecretPhrase, inputUsername , getUsernames, inputCreateGroup,getGroupnames} from './hello_world/hello_world';
 import env from './env';
 const ipcRenderer = require('electron').ipcRenderer;
 
@@ -17,37 +17,43 @@ var dbOK = false;
 var usernameSetAtStartup = false;
 
 function addUser(){
+    document.getElementById('titleContainer').innerHTML = 'Groups';
     document.getElementById('inputBox').innerHTML = inputSecretPhrase();
-
+    document.getElementById('createGroup').innerHTML = inputCreateGroup();
     ipcRenderer.send('secretPhrase');
+    ipcRenderer.send('emitGetGroups');
     ipcRenderer.on('secretPhrase', function(event, msg) {
         document.getElementById('greet').innerHTML = 'Your secret phrase to share : "' + msg + "\"";
     });
 
-    document.getElementById('buttonSecretPhrase').onclick = function() {
+    document.getElementById('buttonSecret').onclick = function() {
         ipcRenderer.send('emitAddUser', document.getElementById('inputSecretPhrase').value);
     };
+
+    ipcRenderer.on("responseGetGroups", function (event, arg) {
+        if(arg){
+            document.getElementById('listsGroup').innerHTML =getGroupnames(arg);
+            for(var k in arg){
+                document.getElementById(arg[k].groupname).onclick = function() {
+                    document.getElementById('titlePage').innerHTML = 'Group : '+this.id;
+                    ipcRenderer.send('emitShowGroup',this.id);
+                };
+            }
+        }
+    });
 
     ipcRenderer.on("responseAddUser", function (event, msg) {
         console.log("Add User : " + msg);
     });
 
-    /*
-    document.getElementById('buttonShowUsers').onclick = function() {
-        ipcRenderer.send('emitGetUsers','ok');
+    document.getElementById('buttonGroupName').onclick = function() {
+        ipcRenderer.send('emitAddGroup', document.getElementById('inputGroupName').value);
     };
 
-    document.getElementById('buttonCreateGroup').onclick = function() {
-        document.getElementById('inputBox').innerHTML = inputCreateGroup();
-
-        document.getElementById('buttonGroupName').onclick = function() {
-            ipcRenderer.send('emitAddGroup', document.getElementById('inputGroupName').value);
-        };
-
-        ipcRenderer.on("responseAddGroup", function (event, msg) {
-            console.log("Add User : " + msg);
-        });
-    };*/
+    ipcRenderer.on("responseAddGroup", function (event, msg) {
+        ipcRenderer.send('emitGetGroups');
+        console.log("Add Group : " + msg);
+    });
 
    /* ipcRenderer.on("responseGetUsers", function (event, arg) {
         if(arg){
@@ -71,6 +77,22 @@ function addUser(){
     });*/
 }
 
+function createUser(){
+    document.getElementById('titleContainer').innerHTML = 'Your User';
+    document.getElementById('greet').innerHTML = 'Create User';
+    document.getElementById('inputBox').innerHTML = inputUsername();
+    document.getElementById('buttonUsername').onclick = function() {
+        ipcRenderer.send('emitSetUsername', document.getElementById('inputUsername').value);
+    };
+
+    ipcRenderer.on("responseSetUsername", function (event, msg) {
+        console.log("Set Username : " + msg);
+        if(msg.toString() == "OK"){
+            addUser();
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     ipcRenderer.send('isUsernameDB');
     ipcRenderer.on('isUsernameDB', function(event, msg){
@@ -81,17 +103,7 @@ document.addEventListener('DOMContentLoaded', function () {
             addUser();
         }
         else if(msg < 1){
-            document.getElementById('inputBox').innerHTML = inputUsername();
-            document.getElementById('buttonUsername').onclick = function() {
-                ipcRenderer.send('emitSetUsername', document.getElementById('inputUsername').value);
-            };
-
-            ipcRenderer.on("responseSetUsername", function (event, msg) {
-                console.log("Set Username : " + msg);
-                if(msg.toString() == "OK"){
-                    addUser();
-                }
-            });
+            createUser();
         }
     });
 });
