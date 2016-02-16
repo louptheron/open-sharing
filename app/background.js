@@ -22,7 +22,7 @@ var chokidar = require('chokidar');
 // in config/env_xxx.json file.
 import env from './env';
 
-var menubarOptions = {width:400, height:100};
+var menubarOptions = {width: 400, height: 100};
 
 var mb = menubar(menubarOptions);
 var mainWindow;
@@ -33,15 +33,11 @@ var mainWindowState = windowStateKeeper('main', {
     height: 600
 });
 
-mb.on('ready', function ready () {
+mb.on('ready', function ready() {
 
     mb.on('after-create-window', function () {
         mb.window.openDevTools();
     });
-
-    /*if(userDB.getUser()){
-     console.log("DB exist");
-     }*/
 
     userDB.countNumberOfMe(function (count) {
         ipcMain.on('isUsernameDB', function (event) {
