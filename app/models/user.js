@@ -44,7 +44,7 @@ export function removeUser(username,callback){
     });
 }
 
-export function createUser(username, ip, port, me,id, callback) {
+export function createUser(username, ip, port, me, id, callback) {
     var doc
     user.count({ _id: id }, function (err, count) {
         if(count > 0){
@@ -54,7 +54,7 @@ export function createUser(username, ip, port, me,id, callback) {
         else {
             if(id!=null){
                 doc = {
-                    _id=id,
+                    _id: id,
                     username: username,
                     ip: ip,
                     port: port,

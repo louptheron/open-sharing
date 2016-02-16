@@ -44,17 +44,27 @@ export function addUser(group_id,user_id){
     });
 }
 
-export function createGroup(groupname,user_id, callback) {
-    groups.count({ groupname:groupname }, function (err, count) {
+export function createGroup(groupname, group_id, user_id, callback) {
+    groups.count({ _id:group_id }, function (err, count) {
         if(count > 0){
             if(callback)
                 return callback("group already exist");
         }
         else {
-            var doc = {
-                groupname: groupname,
-                users: [user_id]
-            };
+            if(group_id != null){
+                var doc = {
+                    _id: group_id,
+                    groupname: groupname,
+                    users: [user_id]
+                };
+            }
+            else {
+                var doc = {
+                    groupname: groupname,
+                    users: [user_id]
+                };
+            }
+
             groups.insert(doc, function (err) {
                 if(err){
                     if(callback)

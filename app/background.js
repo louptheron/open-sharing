@@ -45,16 +45,25 @@ mb.on('ready', function ready() {
         });
     });
 
-    ipcMain.on('addUser', function (event, arg) {
+    ipcMain.on('joinGroup', function (event, arg) {
         if (arg) {
             arg = arg.split(':');
             if (arg.length == 4) {
-                userDB.createUser(arg[2], arg[3], arg[4], "false", function (res) {
+                userDB.createUser(arg[2], arg[3], arg[4], "false", arg[5], function (res) {
                     if (res) {
-                        event.sender.send('addUser', 'ERR: ' + res);
+                        event.sender.send('joinGroup', 'ERR: ' + res);
                     }
                     else {
-                        event.sender.send('addUser', 'OK');
+                        event.sender.send('joinGroup', 'OK');
+                        groupDB.createGroup(arg[0], arg[1], function (res) {
+                            if (res) {
+                                event.sender.send('responseAddGroup', 'ERR: ' + res);
+                            }
+                            else {
+                                event.sender.send('responseAddGroup', 'OK');
+
+                            }
+                        });
                         // arg[0] <- group name
                         // arg[1] <- group id
                         // TODO: create new group, send msg to owner to get group users and files
@@ -62,11 +71,11 @@ mb.on('ready', function ready() {
                 });
             }
             else {
-                event.sender.send('addUser', 'Invalid Secret Phrase')
+                event.sender.send('joinGroup', 'Invalid Secret Phrase')
             }
         }
         else {
-            event.sender.send('addUser', 'No Data');
+            event.sender.send('joinGroup', 'No Data');
         }
     });
 
@@ -169,11 +178,12 @@ mb.on('ready', function ready() {
     });
 
     ipcMain.on('showGroup', function (event, arg) {
-        userDB.getUser(function (user) {
-            if (user) {
-                event.sender.send('showGroup', user._id + ':' + arg + utils.getSecretPhrase());
-            }
-        });
+            userDB.getUser(function (user) {
+                if (user) {
+                    event.sender.send('showGroup', arg.groupname + ':' + arg._id + ':' + user.username + utils.getIpPort() + ':' + user._id);
+                }
+            });
+
     });
 
     // Initialize watcher.

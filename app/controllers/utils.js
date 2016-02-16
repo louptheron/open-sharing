@@ -49,7 +49,7 @@ export function userDirFiles(){
     });
 }
 
-export function getSecretPhrase(){
+export function getIpPort(){
     return ':' + getExternalIp() + ':' + port;
 }
 

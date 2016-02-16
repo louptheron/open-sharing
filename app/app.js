@@ -23,7 +23,7 @@ function addUser(){
     ipcRenderer.send('emitGetGroups');
 
     document.getElementById('buttonSecret').onclick = function() {
-        ipcRenderer.send('addUser', document.getElementById('inputSecretPhrase').value);
+        ipcRenderer.send('joinGroup', document.getElementById('inputSecretPhrase').value);
     };
 
     ipcRenderer.on("responseGetGroups", function (event, arg) {
@@ -32,7 +32,7 @@ function addUser(){
             for(var k in arg){
                 document.getElementById(arg[k]._id).onclick = function() {
                     document.getElementById('titlePage').innerHTML = 'Group : '+ arg[k].groupname;
-                    ipcRenderer.send('showGroup', this.id);
+                    ipcRenderer.send('showGroup', arg[k]);
                     ipcRenderer.on('showGroup', function(event, msg) {
                         document.getElementById('greet').innerHTML = 'Your secret phrase to share : "' + msg + "\"";
                     });
@@ -41,8 +41,8 @@ function addUser(){
         }
     });
 
-    ipcRenderer.on("addUser", function (event, msg) {
-        console.log("Add User : " + msg);
+    ipcRenderer.on("joinGroup", function (event, msg) {
+        console.log("join group: " + msg);
     });
 
     document.getElementById('buttonGroupName').onclick = function() {
