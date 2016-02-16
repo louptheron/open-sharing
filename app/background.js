@@ -34,39 +34,27 @@ var mainWindowState = windowStateKeeper('main', {
 });
 
 mb.on('ready', function ready () {
-    mainWindow = new BrowserWindow({
-        x: mainWindowState.x,
-        y: mainWindowState.y,
-        width: mainWindowState.width,
-        height: mainWindowState.height
+
+    mb.on('after-create-window', function () {
+        mb.window.openDevTools();
     });
 
-    if (mainWindowState.isMaximized) {
-        mainWindow.maximize();
-    }
-
-    if (env.name === 'test') {
-        mainWindow.loadURL('file://' + __dirname + '/spec.html');
-    } else {
-        mainWindow.loadURL('file://' + __dirname + '/app.html');
-    }
-
     /*if(userDB.getUser()){
-        console.log("DB exist");
-    }*/
+     console.log("DB exist");
+     }*/
 
-    userDB.countNumberOfMe(function(count){
-        ipcMain.on('isUsernameDB', function(event){
+    userDB.countNumberOfMe(function (count) {
+        ipcMain.on('isUsernameDB', function (event) {
             event.sender.send('isUsernameDB', count);
         });
     });
 
-    ipcMain.on('emitAddUser', function(event, arg) {
-        if(arg){
+    ipcMain.on('emitAddUser', function (event, arg) {
+        if (arg) {
             arg = arg.split(':');
-            if(arg.length == 3){
-                userDB.createUser(arg[0], arg[1], arg[2], "false", function(res) {
-                    if(res){
+            if (arg.length == 3) {
+                userDB.createUser(arg[0], arg[1], arg[2], "false", function (res) {
+                    if (res) {
                         event.sender.send('responseAddUser', 'ERR: ' + res);
                     }
                     else {
@@ -83,45 +71,74 @@ mb.on('ready', function ready () {
         }
     });
 
-    ipcMain.on('emitGetUsers', function(event,arg) {
-        if(arg.toString()=='ok'){
-            userDB.getUser(function(res){
+    ipcMain.on('emitGetUsers', function (event, arg) {
+        if (arg.toString() == 'ok') {
+            userDB.getUser(function (res) {
                 event.sender.send('responseGetUsers', res);
             });
         }
-        else{
+        else {
             event.sender.send('responseGetUsers', 'No Data');
         }
     });
 
-    ipcMain.on('emitGetGroups', function(event) {
-        groupDB.getAllGroups(function(res){
-            if(res){
-                event.sender.send('responseGetGroups',res);
+    ipcMain.on('emitGetGroups', function (event) {
+        groupDB.getAllGroups(function (res) {
+            if (res) {
+                event.sender.send('responseGetGroups', res);
             }
         });
     });
 
-    ipcMain.on('emitDeleteUser', function(event,arg) {
-        if(arg){
-            userDB.removeUser(arg,function(res){
-                if(res){
-                    event.sender.send('responseDeleteUser','ERR'+ res);
+    ipcMain.on('emitDeleteUser', function (event, arg) {
+        if (arg) {
+            userDB.removeUser(arg, function (res) {
+                if (res) {
+                    event.sender.send('responseDeleteUser', 'ERR' + res);
                 }
-                else{
+                else {
                     event.sender.send('responseDeleteUser', 'OK');
                 }
             });
         }
-        else{
+        else {
             event.sender.send('responseDeleteUser', 'No Data');
         }
     });
 
-    ipcMain.on('emitSetUsername', function(event, arg) {
-        if(arg){
-            userDB.createUser(arg, utils.getInternalIp(), utils.port, "true", function(res) {
-                if(res){
+    ipcMain.on('openApp', function (event, arg) {
+        mainWindow = new BrowserWindow({
+            x: mainWindowState.x,
+            y: mainWindowState.y,
+            width: mainWindowState.width,
+            height: mainWindowState.height
+        });
+
+        if (mainWindowState.isMaximized) {
+            mainWindow.maximize();
+        }
+
+        if (env.name === 'test') {
+            mainWindow.loadURL('file://' + __dirname + '/spec.html');
+        } else {
+            mainWindow.loadURL('file://' + __dirname + '/app.html');
+        }
+
+        if (env.name !== 'production') {
+            devHelper.setDevMenu();
+            mainWindow.openDevTools();
+        }
+    });
+
+    ipcMain.on('quitApp', function () {
+        mainWindowState.saveState(mainWindow);
+        app.quit();
+    });
+
+    ipcMain.on('emitSetUsername', function (event, arg) {
+        if (arg) {
+            userDB.createUser(arg, utils.getInternalIp(), utils.port, "true", function (res) {
+                if (res) {
                     event.sender.send('responseSetUsername', 'ERR: ' + res);
                 }
                 else {
@@ -134,7 +151,7 @@ mb.on('ready', function ready () {
         }
     });
 
-    ipcMain.on('emitAddGroup', function(event, arg) {
+    ipcMain.on('emitAddGroup', function (event, arg) {
         if (arg) {
             groupDB.createGroup(arg, function (res) {
                 if (res) {
@@ -150,18 +167,13 @@ mb.on('ready', function ready () {
         }
     });
 
-    ipcMain.on('secretPhrase', function(event) {
-        userDB.getUser(function(user) {
-            if(user) {
+    ipcMain.on('secretPhrase', function (event) {
+        userDB.getUser(function (user) {
+            if (user) {
                 event.sender.send('secretPhrase', user.username + utils.getSecretPhrase());
             }
         });
     });
-
-    if (env.name !== 'production') {
-        devHelper.setDevMenu();
-        mainWindow.openDevTools();
-    }
 
     // Initialize watcher.
     var watcher = chokidar.watch(utils.getUserDir(), {
@@ -174,7 +186,7 @@ mb.on('ready', function ready () {
     // Add event listeners.
     watcher
         .on('add', path => log(`File ${path} has been added`))
-        .on('change', function(path) {
+        .on('change', function (path) {
             fs.readFile(path, function (err, data) {
                 var client = new net.Socket();
                 userDB.getFirstUserIp(function (ip) {
@@ -182,11 +194,6 @@ mb.on('ready', function ready () {
                         client.connect(utils.port, "localhost", function () {
                             console.log('Connected');
                             client.write(data, 'binary');
-                        });
-
-                        client.on('data', function (data) {
-                            console.log('Received: ' + data);
-                            //client.destroy(); // kill client after server's response
                         });
 
                         client.on('close', function () {
@@ -202,12 +209,12 @@ mb.on('ready', function ready () {
         .on('error', error => log(`Watcher error: ${error}`))
         .on('ready', () => log('Initial scan complete. Ready for changes'));
 
-       mainWindow.on('close', function () {
-        mainWindowState.saveState(mainWindow);
-    });
+    if (mainWindow) {
+        mainWindow.on('close', function () {
+            mainWindowState.saveState(mainWindow);
+        });
+    }
 });
-
-
 
 app.on('window-all-closed', function () {
     app.quit();
