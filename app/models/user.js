@@ -44,30 +44,41 @@ export function removeUser(username,callback){
     });
 }
 
-export function createUser(username, ip, port, me, callback) {
-    user.count({ username: username }, function (err, count) {
+export function createUser(username, ip, port, me,id, callback) {
+    var doc
+    user.count({ _id: id }, function (err, count) {
         if(count > 0){
             if(callback)
                 return callback("user already exist");
         }
         else {
-            var doc = {
-                username: username,
-                ip: ip,
-                port: port,
-                me: me
-            };
-            user.insert(doc, function (err) {
-                if(err){
-                    if(callback)
-                        return callback(err);
+            if(id!=null){
+                doc = {
+                    _id=id,
+                    username: username,
+                    ip: ip,
+                    port: port,
+                    me: me
+                    }
+            }
+            else{
+                doc = {
+                    username: username,
+                    ip: ip,
+                    port: port,
+                    me: me
                 }
-                else {
-                    if(callback)
-                        return callback();
-                }
-
-            });
+            }
         }
+        user.insert(doc, function (err) {
+            if(err){
+                if(callback)
+                    return callback(err);
+            }
+            else {
+                if(callback)
+                    return callback();
+            }
+        });
     });
 }

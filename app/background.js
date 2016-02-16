@@ -133,7 +133,7 @@ mb.on('ready', function ready() {
 
     ipcMain.on('emitSetUsername', function (event, arg) {
         if (arg) {
-            userDB.createUser(arg, utils.getInternalIp(), utils.port, "true", function (res) {
+            userDB.createUser(arg, utils.getInternalIp(), utils.port, "true",null,function (res) {
                 if (res) {
                     event.sender.send('responseSetUsername', 'ERR: ' + res);
                 }
@@ -149,13 +149,15 @@ mb.on('ready', function ready() {
 
     ipcMain.on('emitAddGroup', function (event, arg) {
         if (arg) {
-            groupDB.createGroup(arg, function (res) {
-                if (res) {
-                    event.sender.send('responseAddGroup', 'ERR: ' + res);
-                }
-                else {
-                    event.sender.send('responseAddGroup', 'OK');
-                }
+            userDB.getUser(function(user){
+                groupDB.createGroup(arg,user._id, function (res) {
+                    if (res) {
+                        event.sender.send('responseAddGroup', 'ERR: ' + res);
+                    }
+                    else {
+                        event.sender.send('responseAddGroup', 'OK');
+                    }
+                });
             });
         }
         else {

@@ -39,7 +39,12 @@ export function removeGroup(groupname,callback){
     });
 }
 
-export function createGroup(groupname, callback) {
+export function addUser(group_id,user_id){
+    groups.update({ _id: group_id }, { $addToSet: { users: user_id } }, {}, function () {
+    });
+}
+
+export function createGroup(groupname,user_id, callback) {
     groups.count({ groupname:groupname }, function (err, count) {
         if(count > 0){
             if(callback)
@@ -47,7 +52,8 @@ export function createGroup(groupname, callback) {
         }
         else {
             var doc = {
-                groupname: groupname
+                groupname: groupname,
+                users: [user_id]
             };
             groups.insert(doc, function (err) {
                 if(err){
