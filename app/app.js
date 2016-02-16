@@ -20,29 +20,28 @@ function addUser(){
     document.getElementById('titleContainer').innerHTML = 'Groups';
     document.getElementById('inputBox').innerHTML = inputSecretPhrase();
     document.getElementById('createGroup').innerHTML = inputCreateGroup();
-    ipcRenderer.send('secretPhrase');
     ipcRenderer.send('emitGetGroups');
-    ipcRenderer.on('secretPhrase', function(event, msg) {
-        document.getElementById('greet').innerHTML = 'Your secret phrase to share : "' + msg + "\"";
-    });
 
     document.getElementById('buttonSecret').onclick = function() {
-        ipcRenderer.send('emitAddUser', document.getElementById('inputSecretPhrase').value);
+        ipcRenderer.send('addUser', document.getElementById('inputSecretPhrase').value);
     };
 
     ipcRenderer.on("responseGetGroups", function (event, arg) {
         if(arg){
-            document.getElementById('listsGroup').innerHTML =getGroupnames(arg);
+            document.getElementById('listsGroup').innerHTML = getGroupnames(arg);
             for(var k in arg){
-                document.getElementById(arg[k].groupname).onclick = function() {
-                    document.getElementById('titlePage').innerHTML = 'Group : '+this.id;
-                    ipcRenderer.send('emitShowGroup',this.id);
+                document.getElementById(arg[k]._id).onclick = function() {
+                    document.getElementById('titlePage').innerHTML = 'Group : '+ arg[k].groupname;
+                    ipcRenderer.send('showGroup', this.id);
+                    ipcRenderer.on('showGroup', function(event, msg) {
+                        document.getElementById('greet').innerHTML = 'Your secret phrase to share : "' + msg + "\"";
+                    });
                 };
             }
         }
     });
 
-    ipcRenderer.on("responseAddUser", function (event, msg) {
+    ipcRenderer.on("addUser", function (event, msg) {
         console.log("Add User : " + msg);
     });
 

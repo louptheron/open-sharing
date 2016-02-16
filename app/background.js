@@ -45,25 +45,28 @@ mb.on('ready', function ready() {
         });
     });
 
-    ipcMain.on('emitAddUser', function (event, arg) {
+    ipcMain.on('addUser', function (event, arg) {
         if (arg) {
             arg = arg.split(':');
-            if (arg.length == 3) {
-                userDB.createUser(arg[0], arg[1], arg[2], "false", function (res) {
+            if (arg.length == 4) {
+                userDB.createUser(arg[2], arg[3], arg[4], "false", function (res) {
                     if (res) {
-                        event.sender.send('responseAddUser', 'ERR: ' + res);
+                        event.sender.send('addUser', 'ERR: ' + res);
                     }
                     else {
-                        event.sender.send('responseAddUser', 'OK');
+                        event.sender.send('addUser', 'OK');
+                        // arg[0] <- group name
+                        // arg[1] <- group id
+                        // TODO: create new group, send msg to owner to get group users and files
                     }
                 });
             }
             else {
-                event.sender.send('responseAddUser', 'Invalid Secret Phrase')
+                event.sender.send('addUser', 'Invalid Secret Phrase')
             }
         }
         else {
-            event.sender.send('responseAddUser', 'No Data');
+            event.sender.send('addUser', 'No Data');
         }
     });
 
@@ -165,10 +168,10 @@ mb.on('ready', function ready() {
         }
     });
 
-    ipcMain.on('secretPhrase', function (event) {
+    ipcMain.on('showGroup', function (event, arg) {
         userDB.getUser(function (user) {
             if (user) {
-                event.sender.send('secretPhrase', user.username + utils.getSecretPhrase());
+                event.sender.send('showGroup', user._id + ':' + arg + utils.getSecretPhrase());
             }
         });
     });
