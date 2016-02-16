@@ -85,8 +85,9 @@ mb.on('ready', function ready() {
         var client = new net.Socket();
         client.connect(port, ip, function () {
             console.log('Connected');
-            client.write(getSecretPhrase(groupInfos), 'binary');
-            //
+            userDB.getUser(function(user){
+                client.write(getSecretPhrase(groupInfos, user), 'binary');
+            });
         });
 
         client.on('close', function () {
@@ -203,7 +204,8 @@ mb.on('ready', function ready() {
 
     function getSecretPhrase(group, user){
         if(group && user){
-            return group.groupname + ':' + group._id + ':' + user.username + utils.getIpPort() + ':' + user._id
+            console.log(group)
+            return group[0].groupname + ':' + group[0]._id + ':' + user.username + utils.getIpPort() + ':' + user._id
         }
     }
 
