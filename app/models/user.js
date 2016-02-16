@@ -54,7 +54,7 @@ export function createUser(username, ip, port, me, id, callback) {
         else {
             if(id!=null){
                 doc = {
-                    _id: id,
+                    _id:id,
                     username: username,
                     ip: ip,
                     port: port,
