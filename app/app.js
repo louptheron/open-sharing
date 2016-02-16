@@ -29,10 +29,10 @@ function addUser(){
     ipcRenderer.on("responseGetGroups", function (event, arg) {
         if(arg){
             document.getElementById('listsGroup').innerHTML = getGroupnames(arg);
-            for(var k in arg){
-                document.getElementById(arg[k]._id).onclick = function() {
-                    document.getElementById('titlePage').innerHTML = 'Group : '+ arg[k].groupname;
-                    ipcRenderer.send('showGroup', arg[k]);
+            for(var k =0;k<arg.length;k++){
+                document.getElementById(k).onclick = function() {
+                    document.getElementById('titlePage').innerHTML = 'Group : '+ arg[this.id].groupname;
+                    ipcRenderer.send('showGroup', arg[this.id]);
                     ipcRenderer.on('showGroup', function(event, msg) {
                         document.getElementById('greet').innerHTML = 'Your secret phrase to share : "' + msg + "\"";
                     });

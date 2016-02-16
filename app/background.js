@@ -177,7 +177,7 @@ mb.on('ready', function ready() {
     ipcMain.on('emitAddGroup', function (event, arg) {
         if (arg) {
             userDB.getUser(function(user){
-                groupDB.createGroup(arg,user._id, function (res) {
+                groupDB.createGroup(arg, null, user._id, function (res) {
                     if (res) {
                         event.sender.send('responseAddGroup', 'ERR: ' + res);
                     }
