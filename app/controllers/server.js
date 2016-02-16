@@ -10,6 +10,6 @@ var server = net.createServer(function(socket) {
     socket.on('data', function(data){
         console.log(data+'');
     })
-}).listen(utils.port, '127.0.0.1');
+}).listen(utils.port, utils.getExternalIp());
 
 export default server;

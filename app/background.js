@@ -48,25 +48,27 @@ mb.on('ready', function ready() {
     ipcMain.on('joinGroup', function (event, arg) {
         if (arg) {
             arg = arg.split(':');
-            if (arg.length == 4) {
-                userDB.createUser(arg[2], arg[3], arg[4], "false", arg[5], function (res) {
+            if (arg.length == 6) {
+                groupDB.createGroup(arg[0], arg[1], null, function (res) {
                     if (res) {
-                        event.sender.send('joinGroup', 'ERR: ' + res);
+                        event.sender.send('responseAddGroup', 'ERR: ' + res);
                     }
                     else {
-                        event.sender.send('joinGroup', 'OK');
-                        groupDB.createGroup(arg[0], arg[1], function (res) {
+                        event.sender.send('responseAddGroup', 'OK');
+                        userDB.createUser(arg[2], arg[3], arg[4], "false", arg[5], function (res) {
                             if (res) {
-                                event.sender.send('responseAddGroup', 'ERR: ' + res);
+                                event.sender.send('joinGroup', 'ERR: ' + res);
                             }
                             else {
-                                event.sender.send('responseAddGroup', 'OK');
-
+                                event.sender.send('joinGroup', 'OK');
+                                groupDB.getGroup(arg[1], function(res){
+                                    if(res){
+                                        sendGroupRequest(res, arg[3], arg[4]);
+                                    }
+                                })
                             }
                         });
-                        // arg[0] <- group name
-                        // arg[1] <- group id
-                        // TODO: create new group, send msg to owner to get group users and files
+
                     }
                 });
             }
@@ -78,6 +80,19 @@ mb.on('ready', function ready() {
             event.sender.send('joinGroup', 'No Data');
         }
     });
+
+    function sendGroupRequest(groupInfos, ip, port){
+        var client = new net.Socket();
+        client.connect(port, ip, function () {
+            console.log('Connected');
+            client.write(getSecretPhrase(groupInfos), 'binary');
+            //
+        });
+
+        client.on('close', function () {
+            console.log('Connection closed');
+        });
+    }
 
     ipcMain.on('emitGetUsers', function (event, arg) {
         if (arg.toString() == 'ok') {
@@ -145,7 +160,7 @@ mb.on('ready', function ready() {
 
     ipcMain.on('emitSetUsername', function (event, arg) {
         if (arg) {
-            userDB.createUser(arg, utils.getInternalIp(), utils.port, "true",null,function (res) {
+            userDB.createUser(arg, utils.getExternalIp(), utils.port, "true",null,function (res) {
                 if (res) {
                     event.sender.send('responseSetUsername', 'ERR: ' + res);
                 }
@@ -180,11 +195,17 @@ mb.on('ready', function ready() {
     ipcMain.on('showGroup', function (event, arg) {
             userDB.getUser(function (user) {
                 if (user) {
-                    event.sender.send('showGroup', arg.groupname + ':' + arg._id + ':' + user.username + utils.getIpPort() + ':' + user._id);
+                    event.sender.send('showGroup', getSecretPhrase(arg, user));
                 }
             });
 
     });
+
+    function getSecretPhrase(group, user){
+        if(group && user){
+            return group.groupname + ':' + group._id + ':' + user.username + utils.getIpPort() + ':' + user._id
+        }
+    }
 
     // Initialize watcher.
     var watcher = chokidar.watch(utils.getUserDir(), {

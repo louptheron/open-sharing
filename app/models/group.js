@@ -17,8 +17,8 @@ export function getAllGroups(callback) {
     });
 }
 
-export function getGroup(groupname,callback) {
-   groups.find({ groupname: groupname }, function(err, docs) {
+export function getGroup(id,callback) {
+   groups.find({ _id: id }, function(err, docs) {
         if(!err){
             return callback(docs);
         }
