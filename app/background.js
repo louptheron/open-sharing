@@ -223,6 +223,7 @@ mb.on('ready', function ready() {
     function getSecretPhrase(group, user){
         if(group && user){
             console.log(group)
+            var group_name, group_id
             if (group.isArray){
                 group_name = group[0].groupname
                 group_id = group[0]._id
