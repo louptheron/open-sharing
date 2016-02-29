@@ -6,7 +6,6 @@
 import * as userDB from './models/user';
 import * as groupDB from './models/group';
 import * as utils from './controllers/utils';
-import * as server from './controllers/server';
 //import * as client from './controllers/client';
 
 import * as net from 'net';
@@ -39,6 +38,26 @@ mb.on('ready', function ready() {
         mb.window.openDevTools();
     });
 
+    net.createServer(function(socket) {
+        //socket.write('Echo server\r\n');
+        //socket.pipe(socket);
+        socket.on('data', function(data){
+            console.log(data + '')
+            data = data.split(':');
+            userDB.createUser(data[2], data[3], data[4], "false", data[5], function (res) {
+                if (!res) {
+                    console.log('bienvenue à :'+data[2]+' le gros bof');
+                }
+                else {
+                    console.log(res);
+                }
+            });
+            groupDB.addUser(data[1],data[5],function(){
+                console.log('add user for group '+data[1]);
+            });
+        })
+    }).listen(utils.port, utils.getExternalIp());
+
     userDB.countNumberOfMe(function (count) {
         ipcMain.on('isUsernameDB', function (event) {
             event.sender.send('isUsernameDB', count);
@@ -68,7 +87,6 @@ mb.on('ready', function ready() {
                                 })
                             }
                         });
-
                     }
                 });
             }
@@ -204,8 +222,7 @@ mb.on('ready', function ready() {
 
     function getSecretPhrase(group, user){
         if(group && user){
-            console.log(group)
-            return group[0].groupname + ':' + group[0]._id + ':' + user.username + utils.getIpPort() + ':' + user._id
+            return group.groupname + ':' + group._id + ':' + user.username + utils.getIpPort() + ':' + user._id
         }
     }
 
