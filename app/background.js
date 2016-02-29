@@ -67,17 +67,25 @@ mb.on('ready', function ready() {
     ipcMain.on('joinGroup', function (event, arg) {
         if (arg) {
             arg = arg.split(':');
+            var group_name = arg[0]
+            var group_id = arg[1]
+            var user_name = arg[2]
+            var user_id = arg[3]
+            var user_ip = arg[4]
+            var user_port = arg[5]
+
             if (arg.length == 6) {
-                groupDB.createGroup(arg[0], arg[1], null, function (res) {
+                groupDB.createGroup(group_name, group_id, user_id, function (res) {
                     if (res) {
                         event.sender.send('responseAddGroup', 'ERR: ' + res);
                     }
                     else {
                         event.sender.send('responseAddGroup', 'OK');
-                        userDB.createUser(arg[2], arg[3], arg[4], "false", arg[5], function (res) {
-                                groupDB.getGroup(arg[1], function(res){
+                        userDB.createUser(user_name, user_id, user_ip, "false", user_port, function (res) {
+                            groupDB.addUser(group_id, user_id)
+                                groupDB.getGroup(group_id, function(res){
                                     if(res){
-                                        sendGroupRequest(res, arg[3], arg[4]);
+                                        sendGroupRequest(res, user_id, user_ip);
                                     }
                                 })
                         });
