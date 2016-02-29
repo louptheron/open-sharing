@@ -75,7 +75,6 @@ mb.on('ready', function ready() {
                     else {
                         event.sender.send('responseAddGroup', 'OK');
                         userDB.createUser(arg[2], arg[3], arg[4], "false", arg[5], function (res) {
-
                                 groupDB.getGroup(arg[1], function(res){
                                     if(res){
                                         sendGroupRequest(res, arg[3], arg[4]);

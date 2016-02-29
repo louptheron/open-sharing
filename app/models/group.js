@@ -20,7 +20,7 @@ export function getAllGroups(callback) {
 export function getGroup(id,callback) {
    groups.find({ _id: id }, function(err, docs) {
         if(!err){
-            return callback(docs);
+            return callback(docs[0]);
         }
         else{
             return callback(err);
