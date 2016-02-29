@@ -205,7 +205,15 @@ mb.on('ready', function ready() {
     function getSecretPhrase(group, user){
         if(group && user){
             console.log(group)
-            return group[0].groupname + ':' + group[0]._id + ':' + user.username + utils.getIpPort() + ':' + user._id
+            if (group.isArray){
+                group_name = group[0].groupname
+                group_id = group[0]._id
+            }
+            else {
+                group_name = group.groupname
+                group_id = group._id
+            }
+            return group_name + ':' + group_id + ':' + user.username + utils.getIpPort() + ':' + user._id
         }
     }
 
