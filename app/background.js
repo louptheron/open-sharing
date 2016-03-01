@@ -46,18 +46,18 @@ mb.on('ready', function ready() {
         //socket.write('Echo server\r\n');
         //socket.pipe(socket);
         socket.on('data', function(data){
-            console.log(data + '')
+            data = data +'';
+            console.log(data)
             data = data.split(':');
             userDB.createUser(data[2], data[3], data[4], "false", data[5], function (res) {
                 if (!res) {
-                    console.log('bienvenue à :'+data[2]+' le gros bof');
+                    console.log('bienvenue à :'+data[2]+' le gros bof'+'dans le group : '+ data[0]);
                 }
                 else {
                     console.log(res);
                 }
             });
             groupDB.addUser(data[1],data[5],function(){
-                console.log('add user for group '+data[1]);
             });
         })
     }).listen(utils.port, utils.getExternalIp());

@@ -47,9 +47,15 @@ export function removeGroup(groupname,callback){
     });
 }
 
-export function addUser(group_id, user_id){
-    groups.update({ _id: group_id }, { $addToSet: { users: {$each: [user_id]} } }, {}, function (err, numReplaced) {
-    });
+export function addUser(group_id,user_id){
+    if(Array.isArray(user_id)){
+        groups.update({ _id: group_id }, { $addToSet: { users: {$each: user_id}}}, {}, function () {
+        });
+    }
+    else{
+        groups.update({ _id: group_id }, { $addToSet: { users: {$each: [user_id]}} }, {}, function () {
+        });
+    }
 }
 
 export function createGroup(groupname, group_id, user_id, callback) {
