@@ -54,7 +54,6 @@ function showMainPage(){
         console.log("Add Group : " + msg);
     });
 
-
 }
 
 function createUser(){

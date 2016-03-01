@@ -6,11 +6,8 @@ var Datastore = require('nedb');
 import env from '../env';
 
 //load the Database
-if (env.name === 'test') {
-    var groups = new Datastore({ filename: (app.getPath('appData') + '/' + app.getName() + '/test_groups.db'), autoload: true });
-} else {
-    var groups = new Datastore({ filename: (app.getPath('appData') + '/' + app.getName() + '/groups.db'), autoload: true });
-}
+var groups = new Datastore({ filename: (app.getPath('appData') + '/' + app.getName() + '/test_groups.db'), autoload: true });
+
 
 //load the Database
 

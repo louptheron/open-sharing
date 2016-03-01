@@ -39,8 +39,9 @@ mb.on('ready', function ready() {
     });
 
     if (env.name === 'test') {
-        userDB.createUser('u_name1', '0:0:0:0', '0000', true, 'u_id1');
-        userDB.createUser('u_name2', '0:0:0:0', '0000', false, 'u_id2');
+        console.log('create test entries in DB')
+        userDB.createUser('u_name1', '0:0:0:0', '0000', "true", 'u_id1');
+        userDB.createUser('u_name2', '0:0:0:0', '0000', "false", 'u_id2');
 
         groupDB.createGroup('g_name1', 'g_id1', 'u_id1');
         groupDB.addUser('g_id1', 'u_id2');
@@ -73,8 +74,8 @@ mb.on('ready', function ready() {
         })
     }).listen(utils.port, utils.getExternalIp());
 
-    userDB.countNumberOfMe(function (count) {
-        ipcMain.on('isUsernameDB', function (event) {
+    ipcMain.on('isUsernameDB', function (event) {
+        userDB.countNumberOfMe(function (count) {
             event.sender.send('isUsernameDB', count);
         });
     });

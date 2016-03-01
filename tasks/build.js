@@ -85,6 +85,7 @@ var bundleSpecs = function () {
     generateSpecsImportFile().then(function (specEntryPointPath) {
         return Q.all([
             bundle(srcDir.path('background.js'), destDir.path('background.js')),
+            bundle(srcDir.path('daemon.js'), destDir.path('daemon.js')),
             bundle(specEntryPointPath, destDir.path('spec.js')),
         ]);
     });

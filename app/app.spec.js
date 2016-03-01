@@ -1,12 +1,17 @@
 // Default imports test
-import * as app from './app';
+const ipcRenderer = require('electron').ipcRenderer;
 
-describe("hello universe", function () {
 
-    it("greets better than hello world", function () {
-        ipcRenderer.send('emitGetGroups');
-        expect(greet()).toBe('Hello Universe!');
+describe('asynchronous IPC test', function(){
+    it('check if app\'s user is set', function(done){
+        var value; // this value will be successfully changed when the function returns
+
+        ipcRenderer.send('isUsernameDB');
+        ipcRenderer.on('isUsernameDB', function(event, msg){
+            value = msg;
+            expect(value).toBe(1);
+            done();
+        });
+
     });
-
 });
-
