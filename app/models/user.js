@@ -21,6 +21,15 @@ export function getUser(callback) {
     });
 }
 
+export function countNumberOfMe(callback) {
+    user.count({me: "true"}, function (err, count) {
+        if(err)
+            return err;
+        else if (callback)
+            return callback(count);
+    });
+}
+
 export function getUsers(array_id,callback){
     user.find({ _id: { $in: array_id }}, function (err, docs) {
         if(!err){
@@ -69,7 +78,7 @@ export function createUser(username, ip, port, me, id, callback) {
                     ip: ip,
                     port: port,
                     me: me
-                    }
+                }
             }
             else{
                 doc = {

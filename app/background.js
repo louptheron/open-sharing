@@ -38,9 +38,13 @@ mb.on('ready', function ready() {
         mb.window.openDevTools();
     });
 
-    /*createGroup('my_group', g_id1, u_id1);
-    addUser('g_id1', u_id1);*/
+    if (env.name === 'test') {
+        userDB.createUser('u_name1', '0:0:0:0', '0000', true, 'u_id1');
+        userDB.createUser('u_name2', '0:0:0:0', '0000', false, 'u_id2');
 
+        groupDB.createGroup('g_name1', 'g_id1', 'u_id1');
+        groupDB.addUser('g_id1', 'u_id2');
+    }
 
     net.createServer(function(socket) {
         //socket.write('Echo server\r\n');
