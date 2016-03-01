@@ -127,8 +127,10 @@ mb.on('ready', function ready() {
         });
 
         client.on('data', function(data) {
-            data = data +'';
-            console.log(data[0]);
+            data = data.toString();
+            console.log(data);
+            data = JSON.parse(data)
+
             for (var i= 0; i < data.length; i++) {
                 userDB.createUser(data[i].username,data[i].ip,data[i].port,"false",data[i]._id, function (res) {
                     if (!res) {
