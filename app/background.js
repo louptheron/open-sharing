@@ -50,8 +50,8 @@ mb.on('ready', function ready() {
         //socket.write('Echo server\r\n');
         //socket.pipe(socket);
         socket.on('data', function(data){
-            data = data +'';
-            console.log(data)
+            data = data.toString();
+            console.log(data);
             data = data.split(':');
             userDB.createUser(data[2], data[3], data[4], "false", data[5], function (res) {
                 if (!res) {
@@ -64,8 +64,8 @@ mb.on('ready', function ready() {
             groupDB.getGroup(data[1],function(res){
                if(res){
                    userDB.getUsers(res.users,function(data){
-                       console.log(data+'');
-                       socket.write(data);
+                       console.log(data);
+                       socket.write(data+'','binary');
                    })
                }
             });
@@ -130,7 +130,6 @@ mb.on('ready', function ready() {
             data = data.toString();
             console.log(data);
             data = JSON.parse(data)
-
             for (var i= 0; i < data.length; i++) {
                 userDB.createUser(data[i].username,data[i].ip,data[i].port,"false",data[i]._id, function (res) {
                     if (!res) {
