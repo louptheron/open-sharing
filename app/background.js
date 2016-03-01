@@ -42,18 +42,18 @@ mb.on('ready', function ready() {
         //socket.write('Echo server\r\n');
         //socket.pipe(socket);
         socket.on('data', function(data){
-            console.log(data + '')
+            data = data +'';
+            console.log(data)
             data = data.split(':');
             userDB.createUser(data[2], data[3], data[4], "false", data[5], function (res) {
                 if (!res) {
-                    console.log('bienvenue à :'+data[2]+' le gros bof');
+                    console.log('bienvenue à :'+data[2]+' le gros bof'+'dans le group : '+ data[0]);
                 }
                 else {
                     console.log(res);
                 }
             });
             groupDB.addUser(data[1],data[5],function(){
-                console.log('add user for group '+data[1]);
             });
         })
     }).listen(utils.port, utils.getExternalIp());
@@ -70,9 +70,9 @@ mb.on('ready', function ready() {
             var group_name = arg[0]
             var group_id = arg[1]
             var user_name = arg[2]
-            var user_id = arg[3]
-            var user_ip = arg[4]
-            var user_port = arg[5]
+            var user_id = arg[5]
+            var user_ip = arg[3]
+            var user_port = arg[4]
 
             if (arg.length == 6) {
                 groupDB.createGroup(group_name, group_id, user_id, function (res) {
@@ -224,17 +224,7 @@ mb.on('ready', function ready() {
 
     function getSecretPhrase(group, user){
         if(group && user){
-            console.log(group)
-            var group_name, group_id
-            if (group.isArray){
-                group_name = group[0].groupname
-                group_id = group[0]._id
-            }
-            else {
-                group_name = group.groupname
-                group_id = group._id
-            }
-            return group_name + ':' + group_id + ':' + user.username + utils.getIpPort() + ':' + user._id
+            return group.groupname + ':' + group._id + ':' + user.username + utils.getIpPort() + ':' + user._id
         }
     }
 

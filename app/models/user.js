@@ -14,14 +14,17 @@ export function getUser(callback) {
     });
 }
 
-export function countNumberOfMe(callback) {
-    user.count({me: "true"}, function (err, count) {
-        if(err)
-            return err;
-        else if (callback)
-            return callback(count);
+export function getUsers(array_id,callback){
+    user.find({ _id: { $in: array_id }}, function (err, docs) {
+        if(!err){
+            return callback(docs);
+        }
+        else{
+            return callback(err);
+        }
     });
 }
+
 
 export function getFirstUserIp(callback) {
     user.findOne({ me: "false" }, function(err, docs) {

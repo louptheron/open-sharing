@@ -18,9 +18,9 @@ export function getAllGroups(callback) {
 }
 
 export function getGroup(id,callback) {
-   groups.find({ _id: id }, function(err, docs) {
+   groups.findOne({ _id: id }, function(err, docs) {
         if(!err){
-            return callback(docs[0]);
+            return callback(docs);
         }
         else{
             return callback(err);
@@ -40,8 +40,14 @@ export function removeGroup(groupname,callback){
 }
 
 export function addUser(group_id,user_id){
-    groups.update({ _id: group_id }, { $addToSet: { users: user_id } }, {}, function () {
-    });
+    if(Array.isArray(user_id)){
+        groups.update({ _id: group_id }, { $addToSet: { users: {$each: user_id}}}, {}, function () {
+        });
+    }
+    else{
+        groups.update({ _id: group_id }, { $addToSet: { users: {$each: [user_id]}} }, {}, function () {
+        });
+    }
 }
 
 export function createGroup(groupname, group_id, user_id, callback) {
