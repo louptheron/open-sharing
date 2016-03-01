@@ -15,7 +15,6 @@ describe('asynchronous IPC test', function(){
         var value; // this value will be successfully changed when the function returns
         ipcRenderer.send('setUsername', "u_name2");
         ipcRenderer.on('setUsername', function(event, msg){
-            console.log(msg)
             value = msg;
             expect(value).toBe('OK');
             done();
@@ -35,12 +34,11 @@ describe('asynchronous IPC test', function(){
 
     });
 
-    it('join groups', function(done){
+    it('should join a group', function(done){
         var value; // this value will be successfully changed when the function returns
 
         ipcRenderer.send('joinGroup', "g_name2:g_id2:u_id2:8.8.8.8:0000:u_id2");
         ipcRenderer.on('joinGroup', function(event, msg){
-            console.log(msg)
             value = msg;
             expect(value).toBe('OK');
             done();
@@ -48,4 +46,19 @@ describe('asynchronous IPC test', function(){
 
     });
 
+    it('should get a group', function(done){
+        var value; // this value will be successfully changed when the function returns
+        var result = ['g_name2'];
+
+        ipcRenderer.send('getGroups');
+        ipcRenderer.on("getGroups", function (event, arg) {
+            if(arg){
+                    value = arg;
+                    expect(arg[0].groupname).toBe(result[0]);
+                    done();
+            }
+        });
+    });
 });
+
+
