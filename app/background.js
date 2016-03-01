@@ -65,7 +65,8 @@ mb.on('ready', function ready() {
                if(res){
                    userDB.getUsers(res.users,function(data){
                        console.log(data);
-                       socket.write(data+'','binary');
+                       var str = JSON.stringify(data);
+                       socket.write(str,'binary');
                    })
                }
             });
