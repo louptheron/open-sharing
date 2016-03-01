@@ -40,10 +40,6 @@ mb.on('ready', function ready() {
 
     if (env.name === 'test') {
         console.log('create test entries in DB')
-        userDB.createUser('u_name1', '0.0.0.0', '0000', "true", 'u_id1');
-
-        groupDB.createGroup('g_name1', 'g_id1', 'u_id1');
-        groupDB.addUser('g_id1', 'u_id2');
     }
 
     net.createServer(function(socket) {
