@@ -38,6 +38,10 @@ mb.on('ready', function ready() {
         mb.window.openDevTools();
     });
 
+    /*createGroup('my_group', g_id1, u_id1);
+    addUser('g_id1', u_id1);*/
+
+
     net.createServer(function(socket) {
         //socket.write('Echo server\r\n');
         //socket.pipe(socket);
@@ -70,9 +74,9 @@ mb.on('ready', function ready() {
             var group_name = arg[0]
             var group_id = arg[1]
             var user_name = arg[2]
-            var user_id = arg[3]
-            var user_ip = arg[4]
-            var user_port = arg[5]
+            var user_id = arg[5]
+            var user_ip = arg[3]
+            var user_port = arg[4]
 
             if (arg.length == 6) {
                 groupDB.createGroup(group_name, group_id, user_id, function (res) {
@@ -82,13 +86,13 @@ mb.on('ready', function ready() {
                     else {
                         event.sender.send('responseAddGroup', 'OK');
                         userDB.createUser(user_name, user_id, user_ip, "false", user_port, function (res) {
-                            groupDB.addUser(group_id, user_id)
-                                groupDB.getGroup(group_id, function(res){
-                                    if(res){
-                                        sendGroupRequest(res, user_id, user_ip);
-                                    }
-                                })
                         });
+                        userDB.getUser(function(res){ if (res) groupDB.addUser(group_id, res._id)}) // add myself to group
+                        groupDB.getGroup(group_id, function(res){
+                            if(res){
+                                sendGroupRequest(res, user_ip, user_port);
+                            }
+                        })
                     }
                 });
             }
@@ -107,6 +111,7 @@ mb.on('ready', function ready() {
             console.log('Connected');
             userDB.getUser(function(user){
                 client.write(getSecretPhrase(groupInfos, user), 'binary');
+
             });
         });
 
@@ -115,10 +120,10 @@ mb.on('ready', function ready() {
         });
     }
 
-    ipcMain.on('emitGetUsers', function (event, arg) {
+    ipcMain.on('getUsers', function (event, arg) {
         if (arg.toString() == 'ok') {
             userDB.getUser(function (res) {
-                event.sender.send('responseGetUsers', res);
+                event.sender.send('getUsers', res);
             });
         }
         else {
@@ -126,27 +131,27 @@ mb.on('ready', function ready() {
         }
     });
 
-    ipcMain.on('emitGetGroups', function (event) {
+    ipcMain.on('getGroups', function (event) {
         groupDB.getAllGroups(function (res) {
             if (res) {
-                event.sender.send('responseGetGroups', res);
+                event.sender.send('getGroups', res);
             }
         });
     });
 
-    ipcMain.on('emitDeleteUser', function (event, arg) {
+    ipcMain.on('deleteUser', function (event, arg) {
         if (arg) {
             userDB.removeUser(arg, function (res) {
                 if (res) {
-                    event.sender.send('responseDeleteUser', 'ERR' + res);
+                    event.sender.send('deleteUser', 'ERR' + res);
                 }
                 else {
-                    event.sender.send('responseDeleteUser', 'OK');
+                    event.sender.send('deleteUser', 'OK');
                 }
             });
         }
         else {
-            event.sender.send('responseDeleteUser', 'No Data');
+            event.sender.send('deleteUser', 'No Data');
         }
     });
 
@@ -179,37 +184,37 @@ mb.on('ready', function ready() {
         app.quit();
     });
 
-    ipcMain.on('emitSetUsername', function (event, arg) {
+    ipcMain.on('setUsername', function (event, arg) {
         if (arg) {
             userDB.createUser(arg, utils.getExternalIp(), utils.port, "true",null,function (res) {
                 if (res) {
-                    event.sender.send('responseSetUsername', 'ERR: ' + res);
+                    event.sender.send('setUsername', 'ERR: ' + res);
                 }
                 else {
-                    event.sender.send('responseSetUsername', 'OK');
+                    event.sender.send('setUsername', 'OK');
                 }
             });
         }
         else {
-            event.sender.send('responseSetUsername', 'No Data');
+            event.sender.send('setUsername', 'No Data');
         }
     });
 
-    ipcMain.on('emitAddGroup', function (event, arg) {
+    ipcMain.on('addGroup', function (event, arg) {
         if (arg) {
             userDB.getUser(function(user){
                 groupDB.createGroup(arg, null, user._id, function (res) {
                     if (res) {
-                        event.sender.send('responseAddGroup', 'ERR: ' + res);
+                        event.sender.send('addGroup', 'ERR: ' + res);
                     }
                     else {
-                        event.sender.send('responseAddGroup', 'OK');
+                        event.sender.send('addGroup', 'OK');
                     }
                 });
             });
         }
         else {
-            event.sender.send('responseAddGroup', 'No Data');
+            event.sender.send('addGroup', 'No Data');
         }
     });
 
@@ -224,17 +229,7 @@ mb.on('ready', function ready() {
 
     function getSecretPhrase(group, user){
         if(group && user){
-            console.log(group)
-            var group_name, group_id
-            if (group.isArray){
-                group_name = group[0].groupname
-                group_id = group[0]._id
-            }
-            else {
-                group_name = group.groupname
-                group_id = group._id
-            }
-            return group_name + ':' + group_id + ':' + user.username + utils.getIpPort() + ':' + user._id
+            return group.groupname + ':' + group._id + ':' + user.username + utils.getIpPort() + ':' + user._id
         }
     }
 

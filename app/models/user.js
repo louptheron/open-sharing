@@ -3,8 +3,15 @@
 var app = require('app');
 var Datastore = require('nedb');
 
+import env from '../env';
+
 //load the Database
-var user = new Datastore({ filename: (app.getPath('appData') + '/' + app.getName() + '/user.db'), autoload: true });
+if (env.name === 'test') {
+    var user = new Datastore({ filename: (app.getPath('appData') + '/' + app.getName() + '/test_user.db'), autoload: true });
+} else {
+    var user = new Datastore({ filename: (app.getPath('appData') + '/' + app.getName() + '/user.db'), autoload: true });
+}
+
 
 export function getUser(callback) {
     user.findOne({me: "true"}, function (err, docs) {

@@ -3,8 +3,16 @@
 var app = require('app');
 var Datastore = require('nedb');
 
+import env from '../env';
+
 //load the Database
-var groups = new Datastore({ filename: (app.getPath('appData') + '/' + app.getName() + '/groups.db'), autoload: true });
+if (env.name === 'test') {
+    var groups = new Datastore({ filename: (app.getPath('appData') + '/' + app.getName() + '/test_groups.db'), autoload: true });
+} else {
+    var groups = new Datastore({ filename: (app.getPath('appData') + '/' + app.getName() + '/groups.db'), autoload: true });
+}
+
+//load the Database
 
 export function getAllGroups(callback) {
     groups.find({}, function(err, docs) {
@@ -18,9 +26,9 @@ export function getAllGroups(callback) {
 }
 
 export function getGroup(id,callback) {
-   groups.find({ _id: id }, function(err, docs) {
+   groups.findOne({ _id: id }, function(err, docs) {
         if(!err){
-            return callback(docs[0]);
+            return callback(docs);
         }
         else{
             return callback(err);
@@ -39,8 +47,8 @@ export function removeGroup(groupname,callback){
     });
 }
 
-export function addUser(group_id,user_id){
-    groups.update({ _id: group_id }, { $addToSet: { users: user_id } }, {}, function () {
+export function addUser(group_id, user_id){
+    groups.update({ _id: group_id }, { $addToSet: { users: {$each: [user_id]} } }, {}, function (err, numReplaced) {
     });
 }
 

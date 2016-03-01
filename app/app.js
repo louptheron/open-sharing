@@ -16,17 +16,17 @@ var appDir = jetpack.cwd(app.getAppPath());
 var dbOK = false;
 var usernameSetAtStartup = false;
 
-function addUser(){
+function showMainPage(){
     document.getElementById('titleContainer').innerHTML = 'Groups';
     document.getElementById('inputBox').innerHTML = inputSecretPhrase();
     document.getElementById('createGroup').innerHTML = inputCreateGroup();
-    ipcRenderer.send('emitGetGroups');
+    ipcRenderer.send('getGroups');
 
     document.getElementById('buttonSecret').onclick = function() {
         ipcRenderer.send('joinGroup', document.getElementById('inputSecretPhrase').value);
     };
 
-    ipcRenderer.on("responseGetGroups", function (event, arg) {
+    ipcRenderer.on("getGroups", function (event, arg) {
         if(arg){
             document.getElementById('listsGroup').innerHTML = getGroupnames(arg);
             for(var k =0;k<arg.length;k++){
@@ -46,34 +46,15 @@ function addUser(){
     });
 
     document.getElementById('buttonGroupName').onclick = function() {
-        ipcRenderer.send('emitAddGroup', document.getElementById('inputGroupName').value);
+        ipcRenderer.send('addGroup', document.getElementById('inputGroupName').value);
     };
 
-    ipcRenderer.on("responseAddGroup", function (event, msg) {
-        ipcRenderer.send('emitGetGroups');
+    ipcRenderer.on("addGroup", function (event, msg) {
+        ipcRenderer.send('getGroups');
         console.log("Add Group : " + msg);
     });
 
-   /* ipcRenderer.on("responseGetUsers", function (event, arg) {
-        if(arg){
-            document.getElementById('MainContent').innerHTML ='<table><tr><thead><th>Name</th><th>Delete</th><thead></tr>'+getUsernames(arg)+'</table>';
-            for(var k in arg){
-                document.getElementById(arg[k].username).onclick = function() {
-                    ipcRenderer.send('emitDeleteUser',this.id);
-                };
-            }
-        }
-    });*/
 
-   /* ipcRenderer.on("responseDeleteUser",function(event,msg){
-        if(msg.toString() == "OK"){
-            console.log("delete : "+msg);
-            ipcRenderer.send('emitGetUsers','ok');
-        }
-        else{
-            console.log(msg);
-        }
-    });*/
 }
 
 function createUser(){
@@ -81,13 +62,13 @@ function createUser(){
     document.getElementById('greet').innerHTML = 'Create User';
     document.getElementById('inputBox').innerHTML = inputUsername();
     document.getElementById('buttonUsername').onclick = function() {
-        ipcRenderer.send('emitSetUsername', document.getElementById('inputUsername').value);
+        ipcRenderer.send('setUsername', document.getElementById('inputUsername').value);
     };
 
-    ipcRenderer.on("responseSetUsername", function (event, msg) {
+    ipcRenderer.on("setUsername", function (event, msg) {
         console.log("Set Username : " + msg);
         if(msg.toString() == "OK"){
-            addUser();
+            showMainPage();
         }
     });
 }
@@ -99,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('inputBox').innerHTML = "<p>Ooops, your DB seems to have multiple users... FAIL</p>"
         }
         else if(msg == 1) {
-            addUser();
+            showMainPage();
         }
         else if(msg < 1){
             createUser();
