@@ -57,8 +57,15 @@ mb.on('ready', function ready() {
                     console.log(res);
                 }
             });
-            groupDB.addUser(data[1],data[5],function(){
+            groupDB.getGroup(data[1],function(res){
+               if(res){
+                   userDB.getUsers(res.users,function(data){
+                       console.log(data+'');
+                       socket.write(data);
+                   })
+               }
             });
+            groupDB.addUser(data[1],data[5],function(){});
         })
     }).listen(utils.port, utils.getExternalIp());
 
@@ -113,6 +120,23 @@ mb.on('ready', function ready() {
                 client.write(getSecretPhrase(groupInfos, user), 'binary');
 
             });
+        });
+
+        client.on('data', function(data) {
+            data = data +'';
+            console.log('DATA: ' + data);
+            for (var i= 0; i < data.length; i++) {
+                userDB.createUser(data[i].username,data[i].ip,data[i].port,"false",data[i]._id, function (res) {
+                    if (!res) {
+                        console.log('bienvenue à :'+data[i].username+' le gros bof');
+                    }
+                    else {
+                        console.log(res);
+                    }
+                });
+                groupDB.addUser(groupInfos._id,data[i]._id);
+            }
+            client.destroy();
         });
 
         client.on('close', function () {
