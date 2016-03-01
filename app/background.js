@@ -35,13 +35,12 @@ var mainWindowState = windowStateKeeper('main', {
 mb.on('ready', function ready() {
 
     mb.on('after-create-window', function () {
-        mb.window.openDevTools();
+        //mb.window.openDevTools();
     });
 
     if (env.name === 'test') {
         console.log('create test entries in DB')
-        userDB.createUser('u_name1', '0:0:0:0', '0000', "true", 'u_id1');
-        userDB.createUser('u_name2', '0:0:0:0', '0000', "false", 'u_id2');
+        userDB.createUser('u_name1', '0.0.0.0', '0000', "true", 'u_id1');
 
         groupDB.createGroup('g_name1', 'g_id1', 'u_id1');
         groupDB.addUser('g_id1', 'u_id2');
@@ -93,10 +92,10 @@ mb.on('ready', function ready() {
             if (arg.length == 6) {
                 groupDB.createGroup(group_name, group_id, user_id, function (res) {
                     if (res) {
-                        event.sender.send('responseAddGroup', 'ERR: ' + res);
+                        event.sender.send('joinGroup', 'ERR: ' + res);
                     }
                     else {
-                        event.sender.send('responseAddGroup', 'OK');
+                        event.sender.send('joinGroup', 'OK');
                         userDB.createUser(user_name, user_id, user_ip, "false", user_port, function (res) {
                         });
                         userDB.getUser(function(res){ if (res) groupDB.addUser(group_id, res._id)}) // add myself to group
@@ -129,7 +128,7 @@ mb.on('ready', function ready() {
 
         client.on('data', function(data) {
             data = data +'';
-            console.log('DATA: ' + data);
+            console.log(data[0]);
             for (var i= 0; i < data.length; i++) {
                 userDB.createUser(data[i].username,data[i].ip,data[i].port,"false",data[i]._id, function (res) {
                     if (!res) {
@@ -206,10 +205,17 @@ mb.on('ready', function ready() {
             devHelper.setDevMenu();
             mainWindow.openDevTools();
         }
+
+        mainWindow.on('close', function () {
+            if (env.name === 'test') {
+                userDB.deleteDB();
+                groupDB.deleteDB();
+            }
+            app.quit();
+        });
     });
 
     ipcMain.on('quitApp', function () {
-        mainWindowState.saveState(mainWindow);
         app.quit();
     });
 
@@ -296,11 +302,7 @@ mb.on('ready', function ready() {
         .on('error', error => log(`Watcher error: ${error}`))
         .on('ready', () => log('Initial scan complete. Ready for changes'));
 
-    if (mainWindow) {
-        mainWindow.on('close', function () {
-            mainWindowState.saveState(mainWindow);
-        });
-    }
+
 });
 
 app.on('window-all-closed', function () {

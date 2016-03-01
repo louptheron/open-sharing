@@ -6,7 +6,7 @@ var Datastore = require('nedb');
 import env from '../env';
 
 //load the Database
-var groups = new Datastore({ filename: (app.getPath('appData') + '/' + app.getName() + '/test_groups.db'), autoload: true });
+var groups = new Datastore({ filename: (app.getPath('appData') + '/' + app.getName() + '/groups.db'), autoload: true });
 
 
 //load the Database
@@ -53,6 +53,11 @@ export function addUser(group_id,user_id){
         groups.update({ _id: group_id }, { $addToSet: { users: {$each: [user_id]}} }, {}, function () {
         });
     }
+}
+
+export function deleteDB(){
+    groups.remove({}, { multi: true }, function (err, numRemoved) {
+    });
 }
 
 export function createGroup(groupname, group_id, user_id, callback) {

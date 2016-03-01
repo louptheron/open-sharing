@@ -25,6 +25,11 @@ export function countNumberOfMe(callback) {
     });
 }
 
+export function deleteDB(){
+    user.remove({}, { multi: true }, function (err, numRemoved) {
+    });
+}
+
 export function getUsers(array_id,callback){
     user.find({ _id: { $in: array_id }}, function (err, docs) {
         if(!err){
