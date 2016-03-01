@@ -37,7 +37,7 @@ describe('asynchronous IPC test', function(){
     it('should join a group', function(done){
         var value; // this value will be successfully changed when the function returns
 
-        ipcRenderer.send('joinGroup', "g_name2:g_id2:u_id2:8.8.8.8:0000:u_id2");
+        ipcRenderer.send('joinGroup', "g_name2:g_id2:u_name2:8.8.8.8:0000:u_id2");
         ipcRenderer.on('joinGroup', function(event, msg){
             value = msg;
             expect(value).toBe('OK');

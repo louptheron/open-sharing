@@ -82,9 +82,9 @@ mb.on('ready', function ready() {
             var group_name = arg[0]
             var group_id = arg[1]
             var user_name = arg[2]
-            var user_id = arg[5]
             var user_ip = arg[3]
             var user_port = arg[4]
+            var user_id = arg[5]
 
             if (arg.length == 6) {
                 groupDB.createGroup(group_name, group_id, user_id, function (res) {
@@ -93,7 +93,7 @@ mb.on('ready', function ready() {
                     }
                     else {
                         event.sender.send('joinGroup', 'OK');
-                        userDB.createUser(user_name, user_id, user_ip, "false", user_port, function (res) {
+                        userDB.createUser(user_name, user_ip, user_port, "false", user_id, function (res) {
                         });
                         userDB.getUser(function(res){ if (res) groupDB.addUser(group_id, res._id)}) // add myself to group
                         groupDB.getGroup(group_id, function(res){
