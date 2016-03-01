@@ -54,11 +54,27 @@ describe('asynchronous IPC test', function(){
         ipcRenderer.on("getGroups", function (event, arg) {
             if(arg){
                     value = arg;
-                    expect(arg[0].groupname).toBe(result[0]);
+                    expect(value[0].groupname).toBe(result[0]);
                     done();
             }
         });
     });
+
+    it('should add a group', function(done){
+        var value; // this value will be successfully changed when the function returns
+        var groupname = 'g_name3';
+
+        ipcRenderer.send('addGroup', groupname);
+        ipcRenderer.on("addGroup", function (event, msg) {
+                value = msg;
+                expect(value).toBe('OK');
+                done();
+        });
+    });
+
+
+
+
 });
 
 
