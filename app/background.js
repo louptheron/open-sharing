@@ -49,33 +49,34 @@ mb.on('ready', function ready() {
         socket.on('data', function(data){
             data = data.toString();
             console.log(data);
-            json = JSON.parse(data)
+            var json = JSON.parse(data)
 
-            if (json.msgtype == 'add_file') {
-                console.log("ok : " + json.file + json.data)
+            switch (json.msgtype)
+            {
+                case 'add_file':
+                    console.log("ok : " + json.file + json.data)
+                break;
+                case 'group_joined':
+                    userDB.createUser(data.user.username, data.user.ip, data.user.port, "false", data.user._id, function (res) {
+                        if (!res) {
+                            console.log('bienvenue à : '+data.user.username+' le gros bof'+'dans le group : '+data.group.groupname);
+                        }
+                        else {
+                            console.log(res);
+                        }
+                    });
+                    groupDB.getGroup(data.group._id,function(res){
+                        if(res){
+                            userDB.getUsers(res.users,function(data){
+                                console.log(data);
+                                var str = JSON.stringify(data);
+                                socket.write(str,'binary');
+                            })
+                        }
+                    });
+                    groupDB.addUser(data.group._id,data.user._id,function(){});
+                break;
             }
-            /*
-            data = data.split(':');
-            userDB.createUser(data[2], data[3], data[4], "false", data[5], function (res) {
-                if (!res) {
-                    console.log('bienvenue à : '+data[2]+' le gros bof'+'dans le group : '+ data[0]);
-                }
-                else {
-                    console.log(res);
-                }
-            });
-            groupDB.getGroup(data[1],function(res){
-               if(res){
-                   userDB.getUsers(res.users,function(data){
-                       console.log(data);
-
-                       socket.write(str,'binary');
-                   })
-               }
-            });
-            groupDB.addUser(data[1],data[5],function(){});
-            */
-        })
     }).listen(utils.port, utils.getExternalIp());
 
     ipcMain.on('isUsernameDB', function (event) {
@@ -95,21 +96,21 @@ mb.on('ready', function ready() {
             var user_id = arg[5]
 
             if (arg.length == 6) {
+                userDB.createUser(user_name, user_ip, user_port, "false", user_id, function (res) {
+                });
                 groupDB.createGroup(group_name, group_id, user_id, function (res) {
                     if (res) {
                         event.sender.send('joinGroup', 'ERR: ' + res);
                     }
                     else {
-                        utils.createGroupDir(arg);
-                        event.sender.send('joinGroup', 'OK');
-                        userDB.createUser(user_name, user_ip, user_port, "false", user_id, function (res) {
-                        });
+                        utils.createGroupDir(group_name);
                         userDB.getUser(function(res){ if (res) groupDB.addUser(group_id, res._id)}) // add myself to group
                         groupDB.getGroup(group_id, function(res){
                             if(res){
                                 sendGroupRequest(res, user_ip, user_port);
                             }
                         })
+                        event.sender.send('joinGroup', 'OK');
                     }
                 });
             }
