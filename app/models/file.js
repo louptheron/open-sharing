@@ -41,11 +41,21 @@ export function removeFile(file_id, callback){
     });
 }
 
-export function addFile(filename, group_id, callback) {
-    var doc = {
-        filename: filename,
-        group_id: group_id
-    };
+export function addFile(filename, group_id, file_id, callback) {
+    if (file_id){
+        var doc = {
+            filename: filename,
+            group_id: group_id,
+            _id: file_id
+        };
+    }
+    else {
+        var doc = {
+            filename: filename,
+            group_id: group_id
+        };
+    }
+
     file.insert(doc, function (err) {
         if(err){
             if(callback)

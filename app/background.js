@@ -44,8 +44,6 @@ mb.on('ready', function ready() {
     }
 
     net.createServer(function(socket) {
-        //socket.write('Echo server\r\n');
-        //socket.pipe(socket);
         socket.on('data', function (data) {
             data = data.toString();
             console.log(data);
@@ -53,21 +51,29 @@ mb.on('ready', function ready() {
 
             switch (json.msgtype) {
                 case 'add_file':
-                    console.log("ok : " + json.file + json.data)
+                    fileDB.addFile(json.file.filename, json.file.group_id, json.file._id,
+                        function (err) {
+                            if (err) {
+                                console.log(err);
+                            }
+                            else {
+                                fs.writeFile(json.file.filename, json.data.data.toString());
+                            }
+                        });
                     break;
                 case 'group_joined':
-                    userDB.createUser(data.user.username, data.user.ip,
-                        data.user.port, "false", data.user._id, function (res) {
+                    userDB.createUser(json.user.username, json.user.ip,
+                        json.user.port, "false", json.user._id, function (res) {
                             if (!res) {
                                 console.log('bienvenue à : ' +
-                                    data.user.username + ' le gros bof' +
-                                    'dans le group : ' + data.group.groupname);
+                                    json.user.username + ' le gros bof' +
+                                    'dans le group : ' + json.group.groupname);
                             }
                             else {
                                 console.log(res);
                             }
                         });
-                    groupDB.getGroup(data.group._id, function (res) {
+                    groupDB.getGroup(json.group._id, function (res) {
                         if (res) {
                             userDB.getUsers(res.users, function (data) {
                                 console.log(data);
@@ -76,7 +82,7 @@ mb.on('ready', function ready() {
                             })
                         }
                     });
-                    groupDB.addUser(data.group._id, data.user._id, function () {
+                    groupDB.addUser(json.group._id, json.user._id, function () {
                     });
                     break;
             }
@@ -110,9 +116,6 @@ mb.on('ready', function ready() {
                             }
                             else {
                                 utils.createGroupDir(group_name);
-                                userDB.createUser(user_name, user_ip, user_port,
-                                    "false", user_id, function (res) {
-                                    });
                                 userDB.getUser(function (res) {
                                     if (res) groupDB.addUser(group_id, res._id)
                                 }); // add myself to group
@@ -363,8 +366,8 @@ mb.on('ready', function ready() {
                             fileDB.getFileWithGroupId(filename, group._id,
                                 function (res) {
                                     if (!res) {
-                                        fileDB.addFile(filename, group._id,
-                                            function (err) {
+                                        fileDB.addFile(filename, group._id
+                                            , null, function (err) {
                                                 if (err)
                                                     console.log(err);
                                             });
