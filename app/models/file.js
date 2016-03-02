@@ -16,7 +16,7 @@ export function getFile(file_id, callback) {
     });
 }
 
-export function getFile(file_name, group_id, callback) {
+export function getFileWithGroupId(file_name, group_id, callback) {
     file.findOne({ $or: [{ filename: file_name }, { group_id: group_id }] }, function (err, docs) {
         if (callback) {
             return callback(docs);
@@ -53,7 +53,7 @@ export function addFile(filename, group_id, callback) {
         }
         else {
             if(callback)
-                return callback();
+                return callback(doc);
         }
     });
 }

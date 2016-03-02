@@ -49,10 +49,16 @@ mb.on('ready', function ready() {
         socket.on('data', function(data){
             data = data.toString();
             console.log(data);
+            json = JSON.parse(data)
+
+            if (json.msgtype == 'add_file') {
+                console.log("ok : " + json.file + json.data)
+            }
+            /*
             data = data.split(':');
             userDB.createUser(data[2], data[3], data[4], "false", data[5], function (res) {
                 if (!res) {
-                    console.log('bienvenue à :'+data[2]+' le gros bof'+'dans le group : '+ data[0]);
+                    console.log('bienvenue à : '+data[2]+' le gros bof'+'dans le group : '+ data[0]);
                 }
                 else {
                     console.log(res);
@@ -62,12 +68,13 @@ mb.on('ready', function ready() {
                if(res){
                    userDB.getUsers(res.users,function(data){
                        console.log(data);
-                       var str = JSON.stringify(data);
+
                        socket.write(str,'binary');
                    })
                }
             });
             groupDB.addUser(data[1],data[5],function(){});
+            */
         })
     }).listen(utils.port, utils.getExternalIp());
 
@@ -93,6 +100,7 @@ mb.on('ready', function ready() {
                         event.sender.send('joinGroup', 'ERR: ' + res);
                     }
                     else {
+                        utils.createGroupDir(arg);
                         event.sender.send('joinGroup', 'OK');
                         userDB.createUser(user_name, user_ip, user_port, "false", user_id, function (res) {
                         });
@@ -273,22 +281,36 @@ mb.on('ready', function ready() {
         }
     }
 
-    function sendUpdateToUsers(path, group){
-        fs.readFile(path, function (err, data) {
-            userDB.getUsers(group.users, function(users){
-                users.forEach(function(user){
-                    if (user.ip != null && user.port != null) {
-                        var client = new net.Socket();
-                        client.connect(user.port, user.ip, function () {
-                            console.log('Connected');
-                            client.write(path + '##' + data, 'binary');
-                            client.destroy();
-                        });
+    function sendFileToGroup(path, group){
+        var filename = path.split('/').pop();
+        fileDB.getFileWithGroupId(filename, group._id, function(file) {
+            fs.readFile(path, function (err, data) {
+                var json = {
+                    msgtype: 'add_file',
+                    file: {
+                        group_id: group._id,
+                        file_id: file._id,
+                        filename: file.filename
+                    },
+                    data: data
+                };
+                var jsonString = JSON.stringify(json);
 
-                        client.on('close', function () {
-                            console.log('Connection closed');
-                        });
-                    }
+                userDB.getUsers(group.users, function(users){
+                    users.forEach(function(user){
+                        if (user.ip != null && user.port != null) {
+                            var client = new net.Socket();
+                            client.connect(user.port, user.ip, function () {
+                                console.log('Connected');
+                                client.write(jsonString, 'binary');
+                                client.destroy();
+                            });
+
+                            client.on('close', function () {
+                                console.log('Connection closed');
+                            });
+                        }
+                    });
                 });
             });
         });
@@ -302,25 +324,23 @@ mb.on('ready', function ready() {
                     ignored: /[\/\\]\./,
                     persistent: true
                 });
-
-                // Something to use when events are received.
                 var log = console.log.bind(console);
                 // Add event listeners.
                 watcher
                     .on('add', function (path) {
                         var filename = path.split('/').pop();
-                        fileDB.getFile(filename, group._id, function(res) {
+                        fileDB.getFileWithGroupId(filename, group._id, function(res) {
                             if(!res) {
-                                sendUpdateToUsers(path, group);
-                                fileDB.addFile(filename, function (err) {
+                                fileDB.addFile(filename, group._id, function (err) {
                                     if (err)
                                         console.log(err);
                                 });
+                                sendFileToGroup(path, group);
                             }
                         });
                     })
                     .on('change', function (path) {
-                        sendUpdateToUsers(path, group);
+                        sendUpdatedFileToGroup(path, group);
                     })
                     .on('unlink', path => log(`File ${path} has been removed`))
                     .on('addDir', path => log(`Directory ${path} has been added`))
