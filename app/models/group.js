@@ -55,6 +55,17 @@ export function addUser(group_id,user_id){
     }
 }
 
+export function addFile(group_id, filename){
+    if(Array.isArray(user_id)){
+        groups.update({ _id: group_id }, { $addToSet: { users: {$each: user_id}}}, {}, function () {
+        });
+    }
+    else{
+        groups.update({ _id: group_id }, { $addToSet: { users: {$each: [user_id]}} }, {}, function () {
+        });
+    }
+}
+
 export function deleteDB(){
     groups.remove({}, { multi: true }, function (err, numRemoved) {
     });

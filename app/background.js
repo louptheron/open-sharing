@@ -4,6 +4,7 @@
 // window from here.
 
 import * as userDB from './models/user';
+import * as fileDB from './models/file';
 import * as groupDB from './models/group';
 import * as utils from './controllers/utils';
 //import * as client from './controllers/client';
@@ -289,7 +290,6 @@ mb.on('ready', function ready() {
                         });
                     }
                 });
-
             });
         });
     }
@@ -308,7 +308,16 @@ mb.on('ready', function ready() {
                 // Add event listeners.
                 watcher
                     .on('add', function (path) {
-                        sendUpdateToUsers(path, group);
+                        var filename = path.split('/').pop();
+                        fileDB.getFile(filename, group._id, function(res) {
+                            if(!res) {
+                                sendUpdateToUsers(path, group);
+                                fileDB.addFile(filename, function (err) {
+                                    if (err)
+                                        console.log(err);
+                                });
+                            }
+                        });
                     })
                     .on('change', function (path) {
                         sendUpdateToUsers(path, group);
@@ -322,11 +331,6 @@ mb.on('ready', function ready() {
         }
 
     });
-
-
-
-
-
 });
 
 app.on('window-all-closed', function () {
