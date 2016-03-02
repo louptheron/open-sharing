@@ -10,8 +10,8 @@ export var inputUsername = function () {
 
 export var getUsernames = function(arg){
     var test='';
-    for(var k in arg){
-      test+=('<tr><td>' + arg[k].username + '</td><td><button id="'+arg[k].username+'">Delete</button></td></tr>') ;
+    for(var k=0 ; k<arg.length;k++){
+        test+=('<li>'+arg[k].username+'</li>') ;
     }
     return test;
 };

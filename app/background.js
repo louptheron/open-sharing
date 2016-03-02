@@ -252,12 +252,17 @@ mb.on('ready', function ready() {
     });
 
     ipcMain.on('showGroup', function (event, arg) {
-            userDB.getUser(function (user) {
-                if (user) {
-                    event.sender.send('showGroup', getSecretPhrase(arg, user));
-                }
-            });
-
+        userDB.getUser(function (user) {
+            if (user) {
+                userDB.getUsers(arg.users, function (res) {
+                    var json = {
+                        secret: getSecretPhrase(arg, user),
+                        users: res
+                    }
+                    event.sender.send('showGroup', json);
+                });
+            }
+        });
     });
 
     function getSecretPhrase(group, user){

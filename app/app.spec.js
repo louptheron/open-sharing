@@ -1,4 +1,5 @@
 // Default imports test
+import * as utils from './controllers/utils';
 const ipcRenderer = require('electron').ipcRenderer;
 
 /* PASTE FROM BACKGROUND.JS
@@ -37,7 +38,7 @@ describe('asynchronous IPC test', function(){
     it('should join a group', function(done){
         var value; // this value will be successfully changed when the function returns
 
-        ipcRenderer.send('joinGroup', "g_name2:g_id2:u_name2:8.8.8.8:0000:u_id2");
+        ipcRenderer.send('joinGroup', "g_name2:g_id2:u_name3:8.8.8.8:0000:u_id2");
         ipcRenderer.on('joinGroup', function(event, msg){
             value = msg;
             expect(value).toBe('OK');
@@ -72,6 +73,27 @@ describe('asynchronous IPC test', function(){
         });
     });
 
+   /* it('Show group', function(done){
+        var value; // this value will be successfully changed when the function returns
+        var result;
+        var input_json;
+        ipcRenderer.send('getGroups');
+        ipcRenderer.on("getGroups", function (event, arg) {
+            if(arg){
+                result = arg[0].groupname+":"+arg[0]._id+":u_name2:"+utils.getIpPort()+":"+arg[0].users[1];
+                input_json = {
+                    _id: arg[0]._id,
+                    groupname: arg[0].groupname
+                };
+                ipcRenderer.send('showGroup', input_json);
+                ipcRenderer.on("showGroup", function (event, msg) {
+                    value = msg;
+                    expect(value).toBe(result);
+                    done();
+                });
+            }
+        });
+    });*/
 
 
 

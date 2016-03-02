@@ -34,7 +34,8 @@ function showMainPage(){
                     document.getElementById('titlePage').innerHTML = 'Group : '+ arg[this.id].groupname;
                     ipcRenderer.send('showGroup', arg[this.id]);
                     ipcRenderer.on('showGroup', function(event, msg) {
-                        document.getElementById('greet').innerHTML = 'Your secret phrase to share : "' + msg + "\"";
+                        document.getElementById('greet').innerHTML = 'Your secret phrase to share : "' + msg.secret + "\"";
+                        document.getElementById('listsUser').innerHTML = getUsernames(msg.users);
                     });
                 };
             }
