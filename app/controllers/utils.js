@@ -34,6 +34,15 @@ export function getUserDir() {
     return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'] + '/openSharing';
 }
 
+
+export function createGroupDir(groupname) {
+    if(process.platform == "linux"){
+        if (!fs.existsSync(getUserDir() + '/' + groupname)){
+            fs.mkdirSync(getUserDir() + '/' + groupname);
+        }
+    }
+}
+
 export function createUserDir() {
     if(process.platform == "linux"){
         if (!fs.existsSync(getUserDir())){

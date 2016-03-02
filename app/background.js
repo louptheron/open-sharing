@@ -242,6 +242,7 @@ mb.on('ready', function ready() {
                     }
                     else {
                         event.sender.send('addGroup', 'OK');
+                        utils.createGroupDir(arg);
                     }
                 });
             });
@@ -271,25 +272,16 @@ mb.on('ready', function ready() {
         }
     }
 
-    // Initialize watcher.
-    var watcher = chokidar.watch(utils.getUserDir(), {
-        ignored: /[\/\\]\./,
-        persistent: true
-    });
-
-    // Something to use when events are received.
-    var log = console.log.bind(console);
-    // Add event listeners.
-    watcher
-        .on('add', path => log(`File ${path} has been added`))
-        .on('change', function (path) {
-            fs.readFile(path, function (err, data) {
-                var client = new net.Socket();
-                userDB.getFirstUserIp(function (ip) {
-                    if (ip != null) {
-                        client.connect(utils.port, "localhost", function () {
+    function sendUpdateToUsers(path, group){
+        fs.readFile(path, function (err, data) {
+            userDB.getUsers(group.users, function(users){
+                users.forEach(function(user){
+                    if (user.ip != null && user.port != null) {
+                        var client = new net.Socket();
+                        client.connect(user.port, user.ip, function () {
                             console.log('Connected');
-                            client.write(data, 'binary');
+                            client.write(path + '##' + data, 'binary');
+                            client.destroy();
                         });
 
                         client.on('close', function () {
@@ -297,13 +289,42 @@ mb.on('ready', function ready() {
                         });
                     }
                 });
+
             });
-        })
-        .on('unlink', path => log(`File ${path} has been removed`))
-        .on('addDir', path => log(`Directory ${path} has been added`))
-        .on('unlinkDir', path => log(`Directory ${path} has been removed`))
-        .on('error', error => log(`Watcher error: ${error}`))
-        .on('ready', () => log('Initial scan complete. Ready for changes'));
+        });
+    }
+
+    var watcher;
+    groupDB.getAllGroups(function (res) {
+        if (res) {
+            res.forEach(function(group){
+                watcher = chokidar.watch(utils.getUserDir() + "/" + group.groupname, {
+                    ignored: /[\/\\]\./,
+                    persistent: true
+                });
+
+                // Something to use when events are received.
+                var log = console.log.bind(console);
+                // Add event listeners.
+                watcher
+                    .on('add', function (path) {
+                        sendUpdateToUsers(path, group);
+                    })
+                    .on('change', function (path) {
+                        sendUpdateToUsers(path, group);
+                    })
+                    .on('unlink', path => log(`File ${path} has been removed`))
+                    .on('addDir', path => log(`Directory ${path} has been added`))
+                    .on('unlinkDir', path => log(`Directory ${path} has been removed`))
+                    .on('error', error => log(`Watcher error: ${error}`))
+                    .on('ready', () => log('Initial scan complete. Ready for changes'));
+            })
+        }
+
+    });
+
+
+
 
 
 });
