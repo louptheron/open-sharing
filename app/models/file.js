@@ -42,7 +42,7 @@ export function removeFile(file_id, callback){
 }
 
 export function addFile(filename, group_id, file_id, callback) {
-    if (file_id){
+    if (file_id != null){
         var doc = {
             filename: filename,
             group_id: group_id,

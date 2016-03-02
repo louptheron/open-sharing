@@ -57,7 +57,9 @@ mb.on('ready', function ready() {
                                 console.log(err);
                             }
                             else {
-                                fs.writeFile(json.file.filename, json.data.data.toString());
+                                console.log(utils.getUserDir() + '/' + json.group.groupname + '/' + json.file.filename)
+                                console.log(json.data.data.toString())
+                                fs.writeFile(utils.getUserDir() + '/' + json.group.groupname + '/' + json.file.filename, json.data.data.toString());
                             }
                         });
                     break;
@@ -365,12 +367,14 @@ mb.on('ready', function ready() {
                             var filename = path.split('/').pop();
                             fileDB.getFileWithGroupId(filename, group._id,
                                 function (res) {
+                                    console.log(res)
                                     if (!res) {
                                         fileDB.addFile(filename, group._id
                                             , null, function (err) {
                                                 if (err)
                                                     console.log(err);
                                             });
+
                                         sendFileToGroup(path, group);
                                     }
                                 });
