@@ -49,18 +49,14 @@ mb.on('ready', function ready() {
             console.log(data);
             var json = JSON.parse(data)
 
+            var file_data = new Buffer(json.data.data);
+
             switch (json.msgtype) {
                 case 'add_file':
                     fileDB.addFile(json.file.filename, json.file.group_id, json.file._id,
                         function (err) {
-                            if (err) {
-                                console.log(err);
-                            }
-                            else {
-                                console.log(utils.getUserDir() + '/' + json.group.groupname + '/' + json.file.filename)
-                                console.log(json.data.data.toString())
-                                fs.writeFile(utils.getUserDir() + '/' + json.group.groupname + '/' + json.file.filename, json.data.data.toString());
-                            }
+                            console.log(err);
+                            fs.writeFile(utils.getUserDir() + '/' + json.groupname + '/' + json.file.filename, file_data.toString());
                         });
                     break;
                 case 'group_joined':
@@ -89,315 +85,307 @@ mb.on('ready', function ready() {
                     break;
             }
         });
-        }).listen(utils.port, utils.getExternalIp());
+    }).listen(utils.port, utils.getExternalIp());
 
-        ipcMain.on('isUsernameDB', function (event) {
-            userDB.countNumberOfMe(function (count) {
-                event.sender.send('isUsernameDB', count);
-            });
+    ipcMain.on('isUsernameDB', function (event) {
+        userDB.countNumberOfMe(function (count) {
+            event.sender.send('isUsernameDB', count);
         });
+    });
 
-        ipcMain.on('joinGroup', function (event, arg) {
-            if (arg) {
-                arg = arg.split(':');
-                var group_name = arg[0]
-                var group_id = arg[1]
-                var user_name = arg[2]
-                var user_ip = arg[3]
-                var user_port = arg[4]
-                var user_id = arg[5]
+    ipcMain.on('joinGroup', function (event, arg) {
+        if (arg) {
+            arg = arg.split(':');
+            var group_name = arg[0]
+            var group_id = arg[1]
+            var user_name = arg[2]
+            var user_ip = arg[3]
+            var user_port = arg[4]
+            var user_id = arg[5]
 
-                if (arg.length == 6) {
-                    userDB.createUser(user_name, user_ip, user_port, "false",
-                        user_id, function (res) {
-                        });
-                    groupDB.createGroup(group_name, group_id, user_id,
-                        function (res) {
-                            if (res) {
-                                event.sender.send('joinGroup', 'ERR: ' + res);
-                            }
-                            else {
-                                utils.createGroupDir(group_name);
-                                userDB.getUser(function (res) {
-                                    if (res) groupDB.addUser(group_id, res._id)
-                                }); // add myself to group
-                                groupDB.getGroup(group_id, function (res) {
-                                    if (res) {
-                                        sendGroupRequest(res, user_ip,
-                                            user_port);
-                                    }
-                                });
-                                event.sender.send('joinGroup', 'OK');
-                            }
-                        });
-                }
-                else {
-                    event.sender.send('joinGroup', 'Invalid Secret Phrase')
-                }
-            }
-            else {
-                event.sender.send('joinGroup', 'No Data');
-            }
-        });
-
-        function getSecretPhrase(group, user) {
-            if (group && user) {
-                return group.groupname + ':' + group._id + ':' + user.username +
-                    utils.getIpPort() + ':' + user._id
-            }
-        }
-
-        function sendGroupRequest(groupInfos, ip, port) {
-            var client = new net.Socket();
-            client.connect(port, ip, function () {
-                console.log('Connected');
-                userDB.getUser(function (user) {
-                    var json = {
-                        msgtype: 'group_joined',
-                        group: {
-                            groupname: groupInfos.groupname,
-                            _id: groupInfos._id
-                        },
-                        user: {
-                            username: user.username,
-                            _id: user._id,
-                            ip: user.ip,
-                            port: user.port
-                        }
-                    };
-                    var jsonString = JSON.stringify(json);
-                    client.write(jsonString, 'binary');
-                });
-            });
-
-            client.on('data', function (data) {
-                data = data.toString();
-                console.log(data);
-                data = JSON.parse(data);
-                for (var i = 0; i < data.length; i++) {
-                    userDB.createUser(data[i].username, data[i].ip,
-                        data[i].port, "false", data[i]._id, function (res) {
-                            if (!res) {
-                                console.log('bienvenue à :' + data[i].username +
-                                    ' le gros bof');
-                            }
-                            else {
-                                console.log(res);
-                            }
-                        });
-                    groupDB.addUser(groupInfos._id, data[i]._id);
-                }
-                client.destroy();
-            });
-
-            client.on('close', function () {
-                console.log('Connection closed');
-            });
-        }
-
-        ipcMain.on('getUsers', function (event, arg) {
-            if (arg.toString() == 'ok') {
-                userDB.getUser(function (res) {
-                    event.sender.send('getUsers', res);
-                });
-            }
-            else {
-                event.sender.send('responseGetUsers', 'No Data');
-            }
-        });
-
-        ipcMain.on('getGroups', function (event) {
-            groupDB.getAllGroups(function (res) {
-                if (res) {
-                    event.sender.send('getGroups', res);
-                }
-            });
-        });
-
-        ipcMain.on('deleteUser', function (event, arg) {
-            if (arg) {
-                userDB.removeUser(arg, function (res) {
-                    if (res) {
-                        event.sender.send('deleteUser', 'ERR' + res);
-                    }
-                    else {
-                        event.sender.send('deleteUser', 'OK');
-                    }
-                });
-            }
-            else {
-                event.sender.send('deleteUser', 'No Data');
-            }
-        });
-
-        ipcMain.on('openApp', function (event, arg) {
-            mainWindow = new BrowserWindow({
-                x: mainWindowState.x,
-                y: mainWindowState.y,
-                width: mainWindowState.width,
-                height: mainWindowState.height
-            });
-
-            if (mainWindowState.isMaximized) {
-                mainWindow.maximize();
-            }
-
-            if (env.name === 'test') {
-                mainWindow.loadURL('file://' + __dirname + '/spec.html');
-            } else {
-                mainWindow.loadURL('file://' + __dirname + '/app.html');
-            }
-
-            if (env.name !== 'production') {
-                devHelper.setDevMenu();
-                mainWindow.openDevTools();
-            }
-
-            mainWindow.on('close', function () {
-                if (env.name === 'test') {
-                    userDB.deleteDB();
-                    groupDB.deleteDB();
-                }
-                app.quit();
-            });
-        });
-
-        ipcMain.on('quitApp', function () {
-            app.quit();
-        });
-
-        ipcMain.on('setUsername', function (event, arg) {
-            if (arg) {
-                userDB.createUser(arg, utils.getExternalIp(), utils.port,
-                    "true", null, function (res) {
+            if (arg.length == 6) {
+                userDB.createUser(user_name, user_ip, user_port, "false",
+                    user_id, function (res) {
+                    });
+                groupDB.createGroup(group_name, group_id, user_id,
+                    function (res) {
                         if (res) {
-                            event.sender.send('setUsername', 'ERR: ' + res);
+                            event.sender.send('joinGroup', 'ERR: ' + res);
                         }
                         else {
-                            event.sender.send('setUsername', 'OK');
+                            utils.createGroupDir(group_name);
+                            userDB.getUser(function (res) {
+                                if (res) groupDB.addUser(group_id, res._id)
+                            }); // add myself to group
+                            groupDB.getGroup(group_id, function (res) {
+                                if (res) {
+                                    sendGroupRequest(res, user_ip,
+                                        user_port);
+                                }
+                            });
+                            event.sender.send('joinGroup', 'OK');
                         }
                     });
             }
             else {
-                event.sender.send('setUsername', 'No Data');
+                event.sender.send('joinGroup', 'Invalid Secret Phrase')
             }
-        });
+        }
+        else {
+            event.sender.send('joinGroup', 'No Data');
+        }
+    });
 
-        ipcMain.on('addGroup', function (event, arg) {
-            if (arg) {
-                userDB.getUser(function (user) {
-                    groupDB.createGroup(arg, null, user._id, function (res) {
-                        if (res) {
-                            event.sender.send('addGroup', 'ERR: ' + res);
-                        }
-                        else {
-                            event.sender.send('addGroup', 'OK');
-                            utils.createGroupDir(arg);
-                        }
-                    });
-                });
-            }
-            else {
-                event.sender.send('addGroup', 'No Data');
-            }
-        });
+    function getSecretPhrase(group, user) {
+        if (group && user) {
+            return group.groupname + ':' + group._id + ':' + user.username +
+                utils.getIpPort() + ':' + user._id
+        }
+    }
 
-        ipcMain.on('showGroup', function (event, arg) {
+    function sendGroupRequest(groupInfos, ip, port) {
+        var client = new net.Socket();
+        client.connect(port, ip, function () {
+            console.log('Connected');
             userDB.getUser(function (user) {
-                if (user) {
-                    userDB.getUsers(arg.users, function (res) {
-                        var json = {
-                            secret: getSecretPhrase(arg, user),
-                            users: res
-                        };
-                        event.sender.send('showGroup', json);
-                    });
-                }
+                var json = {
+                    msgtype: 'group_joined',
+                    group: {
+                        groupname: groupInfos.groupname,
+                        _id: groupInfos._id
+                    },
+                    user: user
+                };
+                var jsonString = JSON.stringify(json);
+                client.write(jsonString, 'binary');
             });
         });
 
-        function sendFileToGroup(path, group) {
-            var filename = path.split('/').pop();
-            fileDB.getFileWithGroupId(filename, group._id, function (file) {
-                fs.readFile(path, function (err, data) {
-                    var json = {
-                        msgtype: 'add_file',
-                        file: {
-                            group_id: group._id,
-                            file_id: file._id,
-                            filename: file.filename
-                        },
-                        data: data
-                    };
-                    var jsonString = JSON.stringify(json);
-
-                    userDB.getUsers(group.users, function (users) {
-                        users.forEach(function (user) {
-                            if (user.ip != null && user.port != null) {
-                                var client = new net.Socket();
-                                client.connect(user.port, user.ip, function () {
-                                    console.log('Connected');
-                                    client.write(jsonString, 'binary');
-                                    client.destroy();
-                                });
-
-                                client.on('close', function () {
-                                    console.log('Connection closed');
-                                });
-                            }
-                        });
+        client.on('data', function (data) {
+            data = data.toString();
+            console.log(data);
+            data = JSON.parse(data);
+            for (var i = 0; i < data.length; i++) {
+                userDB.createUser(data[i].username, data[i].ip,
+                    data[i].port, "false", data[i]._id, function (res) {
+                        if (!res) {
+                            console.log('bienvenue à :' + data[i].username +
+                                ' le gros bof');
+                        }
+                        else {
+                            console.log(res);
+                        }
                     });
-                });
+                groupDB.addUser(groupInfos._id, data[i]._id);
+            }
+            client.destroy();
+        });
+
+        client.on('close', function () {
+            console.log('Connection closed');
+        });
+    }
+
+    ipcMain.on('getUsers', function (event, arg) {
+        if (arg.toString() == 'ok') {
+            userDB.getUser(function (res) {
+                event.sender.send('getUsers', res);
             });
         }
+        else {
+            event.sender.send('responseGetUsers', 'No Data');
+        }
+    });
 
-        var watcher;
+    ipcMain.on('getGroups', function (event) {
         groupDB.getAllGroups(function (res) {
             if (res) {
-                res.forEach(function (group) {
-                    watcher = chokidar.watch(utils.getUserDir() + "/" +
-                        group.groupname, {
-                        ignored: /[\/\\]\./,
-                        persistent: true
-                    });
-                    var log = console.log.bind(console);
-                    // Add event listeners.
-                    watcher
-                        .on('add', function (path) {
-                            var filename = path.split('/').pop();
-                            fileDB.getFileWithGroupId(filename, group._id,
-                                function (res) {
-                                    console.log(res)
-                                    if (!res) {
-                                        fileDB.addFile(filename, group._id
-                                            , null, function (err) {
-                                                if (err)
-                                                    console.log(err);
-                                            });
-
-                                        sendFileToGroup(path, group);
-                                    }
-                                });
-                        })
-                        .on('change', function (path) {
-                            //sendUpdatedFileToGroup(path, group);
-                        })
-                        .on('unlink',
-                            path => log(`File ${path} has been removed`))
-                        .on('addDir',
-                            path => log(`Directory ${path} has been added`))
-                        .on('unlinkDir',
-                            path => log(`Directory ${path} has been removed`))
-                        .on('error', error => log(`Watcher error: ${error}`))
-                        .on('ready',
-                        () => log('Initial scan complete. Ready for changes'));
-                })
+                event.sender.send('getGroups', res);
             }
-
         });
-});
+    });
 
-    app.on('window-all-closed', function () {
+    ipcMain.on('deleteUser', function (event, arg) {
+        if (arg) {
+            userDB.removeUser(arg, function (res) {
+                if (res) {
+                    event.sender.send('deleteUser', 'ERR' + res);
+                }
+                else {
+                    event.sender.send('deleteUser', 'OK');
+                }
+            });
+        }
+        else {
+            event.sender.send('deleteUser', 'No Data');
+        }
+    });
+
+    ipcMain.on('openApp', function (event, arg) {
+        mainWindow = new BrowserWindow({
+            x: mainWindowState.x,
+            y: mainWindowState.y,
+            width: mainWindowState.width,
+            height: mainWindowState.height
+        });
+
+        if (mainWindowState.isMaximized) {
+            mainWindow.maximize();
+        }
+
+        if (env.name === 'test') {
+            mainWindow.loadURL('file://' + __dirname + '/spec.html');
+        } else {
+            mainWindow.loadURL('file://' + __dirname + '/app.html');
+        }
+
+        if (env.name !== 'production') {
+            devHelper.setDevMenu();
+            mainWindow.openDevTools();
+        }
+
+        mainWindow.on('close', function () {
+            if (env.name === 'test') {
+                userDB.deleteDB();
+                groupDB.deleteDB();
+            }
+            app.quit();
+        });
+    });
+
+    ipcMain.on('quitApp', function () {
         app.quit();
     });
+
+    ipcMain.on('setUsername', function (event, arg) {
+        if (arg) {
+            userDB.createUser(arg, utils.getExternalIp(), utils.port,
+                "true", null, function (res) {
+                    if (res) {
+                        event.sender.send('setUsername', 'ERR: ' + res);
+                    }
+                    else {
+                        event.sender.send('setUsername', 'OK');
+                    }
+                });
+        }
+        else {
+            event.sender.send('setUsername', 'No Data');
+        }
+    });
+
+    ipcMain.on('addGroup', function (event, arg) {
+        if (arg) {
+            userDB.getUser(function (user) {
+                groupDB.createGroup(arg, null, user._id, function (res) {
+                    if (res) {
+                        event.sender.send('addGroup', 'ERR: ' + res);
+                    }
+                    else {
+                        event.sender.send('addGroup', 'OK');
+                        utils.createGroupDir(arg);
+                    }
+                });
+            });
+        }
+        else {
+            event.sender.send('addGroup', 'No Data');
+        }
+    });
+
+    ipcMain.on('showGroup', function (event, arg) {
+        userDB.getUser(function (user) {
+            if (user) {
+                userDB.getUsers(arg.users, function (res) {
+                    var json = {
+                        secret: getSecretPhrase(arg, user),
+                        users: res
+                    };
+                    event.sender.send('showGroup', json);
+                });
+            }
+        });
+    });
+
+    function sendFileToGroup(path, group) {
+        var filename = path.split('/').pop();
+        fileDB.getFileWithGroupId(filename, group._id, function (file) {
+            fs.readFile(path, function (err, data) {
+                var json = {
+                    msgtype: 'add_file',
+                    file: file,
+                    data: data.toString(),
+                    groupname:group.groupname
+                };
+                var jsonString = JSON.stringify(json);
+
+                userDB.getUsers(group.users, function (users) {
+                    users.forEach(function (user) {
+                        if (user.me == 'false' && user.ip != null && user.port != null) {
+                            var client = new net.Socket();
+                            client.connect(user.port, user.ip, function () {
+                                console.log('Connected');
+                                client.write(jsonString, 'binary');
+                                client.destroy();
+                            });
+
+                            client.on('close', function () {
+                                console.log('Connection closed');
+                            });
+                        }
+                    });
+                });
+            });
+        });
+    }
+
+    var watcher;
+    groupDB.getAllGroups(function (res) {
+        if (res) {
+            res.forEach(function (group) {
+                watcher = chokidar.watch(utils.getUserDir() + "/" +
+                    group.groupname, {
+                    ignored: /[\/\\]\./,
+                    persistent: true
+                });
+                var log = console.log.bind(console);
+                // Add event listeners.
+                watcher
+                    .on('add', function (path) {
+                        var filename = path.split('/').pop();
+                        fileDB.getFileWithGroupId(filename, group._id,
+                            function (res) {
+                                console.log(res)
+                                if (!res) {
+                                    fileDB.addFile(filename, group._id
+                                        , null, function (err) {
+                                            if (err)
+                                                console.log(err);
+                                        });
+
+                                    sendFileToGroup(path, group);
+                                }
+                            });
+                    })
+                    .on('change', function (path) {
+                        //sendUpdatedFileToGroup(path, group);
+                    })
+                    .on('unlink',
+                        path => log(`File ${path} has been removed`))
+                    .on('addDir',
+                        path => log(`Directory ${path} has been added`))
+                    .on('unlinkDir',
+                        path => log(`Directory ${path} has been removed`))
+                    .on('error', error => log(`Watcher error: ${error}`))
+                    .on('ready',
+                    () => log('Initial scan complete. Ready for changes'));
+            })
+        }
+
+    });
+});
+
+app.on('window-all-closed', function () {
+    app.quit();
+});
 
