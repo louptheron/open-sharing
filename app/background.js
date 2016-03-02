@@ -314,8 +314,8 @@ mb.on('ready', function ready() {
                 var json = {
                     msgtype: 'add_file',
                     file: file,
-                    data: data.toString(),
-                    groupname:group.groupname
+                    data: data,
+                    groupname: group.groupname
                 };
                 var jsonString = JSON.stringify(json);
 
@@ -355,7 +355,6 @@ mb.on('ready', function ready() {
                         var filename = path.split('/').pop();
                         fileDB.getFileWithGroupId(filename, group._id,
                             function (res) {
-                                console.log(res)
                                 if (!res) {
                                     fileDB.addFile(filename, group._id
                                         , null, function (err) {
