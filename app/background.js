@@ -104,6 +104,8 @@ mb.on('ready', function ready() {
                     }
                     else {
                         utils.createGroupDir(group_name);
+                        userDB.createUser(user_name, user_ip, user_port, "false", user_id, function (res) {
+                        });
                         userDB.getUser(function(res){ if (res) groupDB.addUser(group_id, res._id)}) // add myself to group
                         groupDB.getGroup(group_id, function(res){
                             if(res){
@@ -123,13 +125,32 @@ mb.on('ready', function ready() {
         }
     });
 
+    function getSecretPhrase(group, user){
+        if(group && user){
+            return group.groupname + ':' + group._id + ':' + user.username + utils.getIpPort() + ':' + user._id
+        }
+    }
+
     function sendGroupRequest(groupInfos, ip, port){
         var client = new net.Socket();
         client.connect(port, ip, function () {
             console.log('Connected');
             userDB.getUser(function(user){
-                client.write(getSecretPhrase(groupInfos, user), 'binary');
-
+                var json = {
+                    msgtype: 'group_joined',
+                    group: {
+                        groupname: groupInfos.groupname,
+                        _id: groupInfos._id
+                    },
+                    user: {
+                        username: user.username,
+                        _id: user._id,
+                        ip: user.ip,
+                        port: user.port
+                    }
+                };
+                var jsonString = JSON.stringify(json);
+                client.write(jsonString, 'binary');
             });
         });
 
@@ -275,12 +296,6 @@ mb.on('ready', function ready() {
             }
         });
     });
-
-    function getSecretPhrase(group, user){
-        if(group && user){
-            return group.groupname + ':' + group._id + ':' + user.username + utils.getIpPort() + ':' + user._id
-        }
-    }
 
     function sendFileToGroup(path, group){
         var filename = path.split('/').pop();
