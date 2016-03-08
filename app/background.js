@@ -17,6 +17,9 @@ import windowStateKeeper from './vendor/electron_boilerplate/window_state';
 const ipcMain = require('electron').ipcMain;
 var menubar = require('menubar');
 var chokidar = require('chokidar');
+var punch = require('holepunch');
+var http = require('http');
+
 
 // Special module holding environment variables which you declared
 // in config/env_xxx.json file.
@@ -42,6 +45,77 @@ mb.on('ready', function ready() {
     if (env.name === 'test') {
         console.log('create test entries in DB')
     }
+    /*
+     punch({
+     debug: false
+     , mappings: [{ internal: 3000, external: 8080, secure: false }]
+     , ipifyUrls: ['api.ipify.org']
+     , protocols: ['none', 'upnp', 'pmp']
+     , rvpnConfigs: []
+     }).then(function (mappings) {
+     // be sure to check for an `error` attribute on each mapping
+     console.log(mappings);
+     }, function (err) {
+     console.log(err);
+     });*/
+
+
+// Send New IP address to online server
+
+    userDB.getUser(function (res) {
+        var post_req  = null,
+            post_data = '{"id":"' + res._id + '", "ip":"' + utils.getExternalIp() + '"}';
+
+        console.log("id : " + res._id);
+
+        var post_options = {
+            hostname: 'server-opensharing.rhcloud.com',
+            port    : '80',
+            path    : '/post',
+            method  : 'POST',
+            headers : {
+                'Content-Type': 'application/json',
+                'Cache-Control': 'no-cache',
+                'Content-Length': post_data.length
+            }
+        };
+
+        post_req = http.request(post_options, function (res) {
+            console.log('STATUS: ' + res.statusCode);
+            console.log('HEADERS: ' + JSON.stringify(res.headers));
+            res.setEncoding('utf8');
+            res.on('data', function (chunk) {
+                if(chunk)
+                    console.log('New IP send to server');
+            });
+        });
+
+        post_req.on('error', function(e) {
+            console.log('problem while sending IP to server: ' + e.message);
+        });
+        post_req.write(post_data);
+        post_req.end();
+    });
+
+    function getUserIp(id, callback){
+        http.get({
+            host: 'http://server-opensharing.rhcloud.com',
+            path: '/user/' + id
+        }, function(response) {
+            // Continuously update stream with data
+            var body = '';
+            response.on('data', function(d) {
+                body += d;
+            });
+            response.on('end', function() {
+                var parsed = JSON.parse(body);
+                callback({
+                    ip: parsed.ip
+                });
+            });
+        });
+
+    }
 
     net.createServer(function(socket) {
         socket.on('data', function (data) {
@@ -54,8 +128,8 @@ mb.on('ready', function ready() {
             switch (json.msgtype) {
                 case 'add_file':
                     fileDB.addFile(json.file.filename, json.file.group_id, json.file._id,
-                        function (err) {
-                            console.log(err);
+                        function (res) {
+                            console.log(res);
                             fs.writeFile(utils.getUserDir() + '/' + json.groupname + '/' + json.file.filename, file_data.toString());
                         });
                     break;
@@ -169,8 +243,8 @@ mb.on('ready', function ready() {
                 userDB.createUser(data[i].username, data[i].ip,
                     data[i].port, "false", data[i]._id, function (res) {
                         if (!res) {
-                            console.log('bienvenue à :' + data[i].username +
-                                ' le gros bof');
+                            console.log('add "' + data[i].username +
+                                '" in the group "' + groupInfos.groupname + '".');
                         }
                         else {
                             console.log(res);
@@ -321,18 +395,20 @@ mb.on('ready', function ready() {
 
                 userDB.getUsers(group.users, function (users) {
                     users.forEach(function (user) {
-                        if (user.me == 'false' && user.ip != null && user.port != null) {
-                            var client = new net.Socket();
-                            client.connect(user.port, user.ip, function () {
-                                console.log('Connected');
-                                client.write(jsonString, 'binary');
-                                client.destroy();
-                            });
+                        getUserIp(user._id, function(user_ip){
+                            if (user.me == 'false' && user_ip.ip != null && user.port != null) {
+                                var client = new net.Socket();
+                                client.connect(user.port, user_ip.ip, function () {
+                                    console.log('Connected');
+                                    client.write(jsonString, 'binary');
+                                    client.destroy();
+                                });
 
-                            client.on('close', function () {
-                                console.log('Connection closed');
-                            });
-                        }
+                                client.on('close', function () {
+                                    console.log('Connection closed');
+                                });
+                            }
+                        });
                     });
                 });
             });
@@ -387,4 +463,3 @@ mb.on('ready', function ready() {
 app.on('window-all-closed', function () {
     app.quit();
 });
-
