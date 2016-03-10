@@ -58,7 +58,7 @@ export function userDirFiles(){
     });
 }
 
-export function getIpPort(){
-    return ':' + getExternalIp() + ':' + port;
+export function getPort(){
+    return  ''+ port;
 }
 

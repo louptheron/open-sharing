@@ -128,10 +128,9 @@ mb.on('ready', function ready() {
             console.log(data);
             var json = JSON.parse(data)
 
-            var file_data = new Buffer(json.data.data);
-
             switch (json.msgtype) {
                 case 'add_file':
+                    var file_data = new Buffer(json.data.data);
                     fileDB.addFile(json.file.filename, json.file.group_id, json.file._id,
                         function (res) {
                             console.log(res);
@@ -178,12 +177,11 @@ mb.on('ready', function ready() {
             var group_name = arg[0]
             var group_id = arg[1]
             var user_name = arg[2]
-            var user_ip = arg[3]
-            var user_port = arg[4]
-            var user_id = arg[5]
+            var user_port = arg[3]
+            var user_id = arg[4]
 
             if (arg.length == 6) {
-                userDB.createUser(user_name, user_ip, user_port, "false",
+                userDB.createUser(user_name, user_port, "false",
                     user_id, function (res) {
                     });
                 groupDB.createGroup(group_name, group_id, user_id,
@@ -198,8 +196,11 @@ mb.on('ready', function ready() {
                             }); // add myself to group
                             groupDB.getGroup(group_id, function (res) {
                                 if (res) {
-                                    sendGroupRequest(res, user_ip,
-                                        user_port);
+                                    getUserIp(user_id, function(user_ip){
+                                        sendGroupRequest(res, user_ip.ip,
+                                            user_port);
+                                    });
+
                                 }
                             });
                             event.sender.send('joinGroup', 'OK');
@@ -217,8 +218,7 @@ mb.on('ready', function ready() {
 
     function getSecretPhrase(group, user) {
         if (group && user) {
-            return group.groupname + ':' + group._id + ':' + user.username +
-                utils.getIpPort() + ':' + user._id
+            return group.groupname + ':' + group._id + ':' + user.username +':'+utils.getPort()+':'+ user._id
         }
     }
 
@@ -245,7 +245,7 @@ mb.on('ready', function ready() {
             console.log(data);
             data = JSON.parse(data);
             for (var i = 0; i < data.length; i++) {
-                userDB.createUser(data[i].username, data[i].ip,
+                userDB.createUser(data[i].username,
                     data[i].port, "false", data[i]._id, function (res) {
                         if (!res) {
                             console.log('add "' + data[i].username +
@@ -338,7 +338,7 @@ mb.on('ready', function ready() {
 
     ipcMain.on('setUsername', function (event, arg) {
         if (arg) {
-            userDB.createUser(arg, utils.getExternalIp(), utils.port,
+            userDB.createUser(arg, utils.port,
                 "true", null, function (res) {
                     if (res) {
                         event.sender.send('setUsername', 'ERR: ' + res);

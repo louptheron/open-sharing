@@ -41,17 +41,6 @@ export function getUsers(array_id,callback){
     });
 }
 
-
-export function getFirstUserIp(callback) {
-    user.findOne({ me: "false" }, function(err, docs) {
-        if(docs){
-            if (callback) {
-                return callback(docs.ip);
-            }
-        }
-    });
-}
-
 export function removeUser(username,callback){
     user.remove({ username: username }, {}, function (err) {
         if(!err){
@@ -63,7 +52,7 @@ export function removeUser(username,callback){
     });
 }
 
-export function createUser(username, ip, port, me, id, callback) {
+export function createUser(username, port, me, id, callback) {
     var doc
     user.count({ _id: id }, function (err, count) {
         if(count > 0){
@@ -75,7 +64,6 @@ export function createUser(username, ip, port, me, id, callback) {
                 doc = {
                     _id:id,
                     username: username,
-                    ip: ip,
                     port: port,
                     me: me
                 }
@@ -83,7 +71,6 @@ export function createUser(username, ip, port, me, id, callback) {
             else{
                 doc = {
                     username: username,
-                    ip: ip,
                     port: port,
                     me: me
                 }
