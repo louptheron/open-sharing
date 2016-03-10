@@ -453,10 +453,10 @@ mb.on('ready', function ready() {
                         fileDB.getFileWithGroupId(filename, group._id,
                             function (res) {
                                 if (res) {
+                                    console.log('jenvoie !!')
                                     sendFileToGroup(path, group);
                                 }
                             });
-                        //sendUpdatedFileToGroup(path, group);
                     })
                     .on('unlink',
                         path => log(`File ${path} has been removed`))

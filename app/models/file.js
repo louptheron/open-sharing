@@ -17,7 +17,7 @@ export function getFile(file_id, callback) {
 }
 
 export function getFileWithGroupId(file_name, group_id, callback) {
-    file.find({ $and: [{ filename: file_name }, { group_id: group_id }] }, function (err, docs) {
+    file.findOne({ $and: [{ filename: file_name }, { group_id: group_id }] }, function (err, docs) {
         if (callback) {
             return callback(docs);
         }
@@ -56,14 +56,19 @@ export function addFile(filename, group_id, file_id, callback) {
         };
     }
 
-    file.insert(doc, function (err) {
-        if(err){
-            if(callback)
-                return callback(err);
+    getFile(file_id, function(res){
+        if(!res){
+            file.insert(doc, function (err) {
+                if(err){
+                    if(callback)
+                        return callback(err);
+                }
+                else {
+                    if(callback)
+                        return callback(doc);
+                }
+            });
         }
-        else {
-            if(callback)
-                return callback(doc);
-        }
-    });
+    })
+
 }
