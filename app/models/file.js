@@ -17,7 +17,7 @@ export function getFile(file_id, callback) {
 }
 
 export function getFileWithGroupId(file_name, group_id, callback) {
-    file.findOne({ $and: [{ filename: file_name }, { group_id: group_id }] }, function (err, docs) {
+    file.find({ $and: [{ filename: file_name }, { group_id: group_id }] }, function (err, docs) {
         if (callback) {
             return callback(docs);
         }

@@ -35,6 +35,7 @@ export function getGroup(id,callback) {
 
 export function removeGroup(groupname,callback){
     groups.remove({ groupname: groupname }, {}, function (err) {
+        groups.persistence.compactDatafile();
         if(!err){
             return callback();
         }
@@ -48,10 +49,13 @@ export function addUser(group_id,user_id){
     if(Array.isArray(user_id)){
         groups.update({ _id: group_id }, { $addToSet: { users: {$each: user_id}}}, {}, function () {
         });
+        groups.persistence.compactDatafile();
     }
     else{
         groups.update({ _id: group_id }, { $addToSet: { users: {$each: [user_id]}} }, {}, function () {
         });
+        groups.persistence.compactDatafile();
+
     }
 }
 
@@ -59,10 +63,12 @@ export function addFile(group_id, filename){
     if(Array.isArray(user_id)){
         groups.update({ _id: group_id }, { $addToSet: { users: {$each: user_id}}}, {}, function () {
         });
+        groups.persistence.compactDatafile();
     }
     else{
         groups.update({ _id: group_id }, { $addToSet: { users: {$each: [user_id]}} }, {}, function () {
         });
+        groups.persistence.compactDatafile();
     }
 }
 
