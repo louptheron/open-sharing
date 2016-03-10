@@ -138,7 +138,7 @@ mb.on('ready', function ready() {
                         });
                     break;
                 case 'group_joined':
-                    userDB.createUser(json.user.username, json.user.ip,
+                    userDB.createUser(json.user.username,
                         json.user.port, "false", json.user._id, function (res) {
                             if (!res) {
                                 console.log('bienvenue à : ' +
@@ -180,7 +180,7 @@ mb.on('ready', function ready() {
             var user_port = arg[3]
             var user_id = arg[4]
 
-            if (arg.length == 6) {
+            if (arg.length == 5) {
                 userDB.createUser(user_name, user_port, "false",
                     user_id, function (res) {
                     });
@@ -449,6 +449,13 @@ mb.on('ready', function ready() {
                             });
                     })
                     .on('change', function (path) {
+                        var filename = path.split('/').pop();
+                        fileDB.getFileWithGroupId(filename, group._id,
+                            function (res) {
+                                if (res) {
+                                    sendFileToGroup(path, group);
+                                }
+                            });
                         //sendUpdatedFileToGroup(path, group);
                     })
                     .on('unlink',
