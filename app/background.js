@@ -17,7 +17,7 @@ import windowStateKeeper from './vendor/electron_boilerplate/window_state';
 const ipcMain = require('electron').ipcMain;
 var menubar = require('menubar');
 var chokidar = require('chokidar');
-var punch = require('holepunch');
+//var punch = require('holepunch');
 var http = require('http');
 
 
@@ -62,38 +62,43 @@ mb.on('ready', function ready() {
 
 // Send New IP address to online server
 
-    userDB.getUser(function (res) {
-        var post_req  = null,
-            post_data = '{"id":"' + res._id + '", "ip":"' + utils.getExternalIp() + '"}';
+    function sendIpToServer(){
+        userDB.getUser(function (res) {
+            if(res != null){
+                var post_req  = null,
+                    post_data = '{"id":"' + res._id + '", "ip":"' + utils.getExternalIp() + '"}';
 
-        console.log("id : " + res._id);
+                console.log("id : " + res._id);
 
-        var post_options = {
-            hostname: 'server-opensharing.rhcloud.com',
-            port    : '80',
-            path    : '/post',
-            method  : 'POST',
-            headers : {
-                'Content-Type': 'application/json',
-                'Cache-Control': 'no-cache',
-                'Content-Length': post_data.length
+                var post_options = {
+                    hostname: 'server-opensharing.rhcloud.com',
+                    port    : '80',
+                    path    : '/post',
+                    method  : 'POST',
+                    headers : {
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache',
+                        'Content-Length': post_data.length
+                    }
+                };
+
+                post_req = http.request(post_options, function (res) {
+                    res.setEncoding('utf8');
+                    res.on('data', function (chunk) {
+                        if(chunk)
+                            console.log('New IP send to server : ' + chunk);
+                    });
+                });
+
+                post_req.on('error', function(e) {
+                    console.log('problem while sending IP to server: ' + e.message);
+                });
+                post_req.write(post_data);
+                post_req.end();
             }
-        };
-
-        post_req = http.request(post_options, function (res) {
-            res.setEncoding('utf8');
-            res.on('data', function (chunk) {
-                if(chunk)
-                    console.log('New IP send to server : ' + chunk);
-            });
         });
+    }
 
-        post_req.on('error', function(e) {
-            console.log('problem while sending IP to server: ' + e.message);
-        });
-        post_req.write(post_data);
-        post_req.end();
-    });
 
     function getUserIp(id, callback){
         http.get({
@@ -114,6 +119,8 @@ mb.on('ready', function ready() {
         });
 
     }
+
+    sendIpToServer();
 
     net.createServer(function(socket) {
         socket.on('data', function (data) {
@@ -338,6 +345,7 @@ mb.on('ready', function ready() {
                     }
                     else {
                         event.sender.send('setUsername', 'OK');
+                        sendIpToServer();
                     }
                 });
         }
