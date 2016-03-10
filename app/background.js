@@ -442,9 +442,8 @@ mb.on('ready', function ready() {
                                         , null, function (err) {
                                             if (err)
                                                 console.log(err);
+                                            sendFileToGroup(path, group);
                                         });
-
-                                    sendFileToGroup(path, group);
                                 }
                             });
                     })

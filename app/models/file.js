@@ -43,7 +43,7 @@ export function removeFile(file_id, callback){
 
 export function removeChangedFlagOnFile(file_id){
     file.update({ _id: file_id }, { $set: { changed: 'true' } }, function (err, numReplaced) {
-        console.log(numReplaced);
+        file.persistence.compactDatafile();
     });
 }
 
@@ -67,6 +67,7 @@ export function addFile(filename, group_id, file_id, callback) {
     getFile(file_id, function(res){
         if(res) {
             file.update({ _id: file_id }, { $set: { changed: 'true' } }, function (err, numReplaced) {
+                file.persistence.compactDatafile();
             });
         }
         else {
