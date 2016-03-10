@@ -41,6 +41,12 @@ export function removeFile(file_id, callback){
     });
 }
 
+export function removeChangedFlagOnFile(file_id){
+    file.update({ _id: file_id }, { $set: { changed: 'true' } }, function (err, numReplaced) {
+        console.log(numReplaced);
+    });
+}
+
 export function addFile(filename, group_id, file_id, callback) {
     if (file_id != null){
         var doc = {
@@ -58,11 +64,9 @@ export function addFile(filename, group_id, file_id, callback) {
         };
     }
 
-
     getFile(file_id, function(res){
         if(res) {
-            db.update({ _id: file_id }, { $set: { changed: 'true' } }, function (err, numReplaced) {
-                console.log(numReplaced);
+            file.update({ _id: file_id }, { $set: { changed: 'true' } }, function (err, numReplaced) {
             });
         }
         else {

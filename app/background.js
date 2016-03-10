@@ -453,8 +453,15 @@ mb.on('ready', function ready() {
                         fileDB.getFileWithGroupId(filename, group._id,
                             function (res) {
                                 if (res) {
+                                    fileDB.getFile(res._id, function(res){
+                                        if(res.changed == 'true'){
+                                            fileDB.removeChangedFlagOnFile(res._id);
+                                        }
+                                        else {
+                                            sendFileToGroup(path, group);
+                                        }
+                                    });
                                     console.log('jenvoie !!')
-                                    sendFileToGroup(path, group);
                                 }
                             });
                     })
