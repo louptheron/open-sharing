@@ -102,7 +102,7 @@ mb.on('ready', function ready() {
 
     function getUserIp(id, callback){
         http.get({
-            host: 'http://server-opensharing.rhcloud.com',
+            host: 'server-opensharing.rhcloud.com',
             path: '/user/' + id
         }, function(response) {
             // Continuously update stream with data
