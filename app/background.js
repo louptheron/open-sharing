@@ -134,8 +134,8 @@ mb.on('ready', function ready() {
                     fileDB.addFile(json.file.filename, json.file.group_id, json.file._id,
                         function (res) {
                             console.log(res);
-                            fs.writeFile(utils.getUserDir() + '/' + json.groupname + '/' + json.file.filename, file_data.toString());
                         });
+                    fs.writeFile(utils.getUserDir() + '/' + json.groupname + '/' + json.file.filename, file_data.toString());
                     break;
                 case 'group_joined':
                     userDB.createUser(json.user.username,

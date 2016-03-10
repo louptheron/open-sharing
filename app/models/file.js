@@ -46,18 +46,26 @@ export function addFile(filename, group_id, file_id, callback) {
         var doc = {
             filename: filename,
             group_id: group_id,
-            _id: file_id
+            _id: file_id,
+            changed: 'false'
         };
     }
     else {
         var doc = {
             filename: filename,
-            group_id: group_id
+            group_id: group_id,
+            changed: 'false'
         };
     }
 
+
     getFile(file_id, function(res){
-        if(!res){
+        if(res) {
+            db.update({ _id: file_id }, { $set: { changed: 'true' } }, function (err, numReplaced) {
+                console.log(numReplaced);
+            });
+        }
+        else {
             file.insert(doc, function (err) {
                 if(err){
                     if(callback)
