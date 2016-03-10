@@ -81,12 +81,10 @@ mb.on('ready', function ready() {
         };
 
         post_req = http.request(post_options, function (res) {
-            console.log('STATUS: ' + res.statusCode);
-            console.log('HEADERS: ' + JSON.stringify(res.headers));
             res.setEncoding('utf8');
             res.on('data', function (chunk) {
                 if(chunk)
-                    console.log('New IP send to server');
+                    console.log('New IP send to server : ' + chunk);
             });
         });
 
