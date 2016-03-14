@@ -143,6 +143,8 @@ mb.on('ready', function ready() {
                         client.connect(user.port, user_ip.ip, function () {
                             fileDB.getGroupFiles(group._id, function(files) {
                                 var json = {
+                                    user_ip: utils.getExternalIp(),
+                                    user_port: utils.getPort(),
                                     msgtype: 'compare_hash',
                                     groupname: group.groupname,
                                     group_id: group._id,
@@ -163,8 +165,8 @@ mb.on('ready', function ready() {
                                         itemsProcessed++;
                                         if(itemsProcessed === files.length) {
                                             var jsonString = JSON.stringify(json);
-                                            console.log('Connected');
                                             client.write(jsonString, 'binary');
+                                            console.log('test')
                                         }
                                     });
                                 });
@@ -176,8 +178,9 @@ mb.on('ready', function ready() {
                         });
 
                         client.on('error', function (err) {
-                            if(err.code == 'ECONNREFUSED'){
+                            if(err.code == 'ECONNREFUSED' || err.code == 'EHOSTUNREACH'){
                                 console.log('test to connect to another user...');
+
                                 iterateNumber++;
                                 getFilesOnStartup(group, iterateNumber);
                             }
@@ -186,7 +189,6 @@ mb.on('ready', function ready() {
                 }
                 else {
                     iterateNumber++;
-                    console.log(iterateNumber)
                     getFilesOnStartup(group, iterateNumber);
                 }
             }
@@ -204,6 +206,52 @@ mb.on('ready', function ready() {
         }
     });
 
+    function sendFiles(json){
+        fileDB.getGroupFiles(json.group_id, function(files) {
+            files.forEach(function(fileInDb) {
+                var path = utils.getUserDir() + '/' + json.groupname + '/' + fileInDb.filename;
+                fs.readFile(path, function (err, data) {
+                    if (err) {
+                        console.log(err)
+                    }
+                    else {
+                        var fileFound = false;
+                        var response_json = {
+                            msgtype: 'add_file',
+                            file: fileInDb,
+                            data: data,
+                            groupname: json.groupname
+                        };
+                        var jsonString = JSON.stringify(response_json);
+                        var itemsProcessed = 0;
+                        json.files.forEach(function(file) {
+                            if(fileInDb.filename === file.filename) {
+                                fileFound = true;
+                                if(file.hash != crypto.createHash('sha256').update(data).digest('hex')){
+                                    var client = new net.Socket();
+                                    client.connect(json.user_port, json.user_ip, function () {
+                                        client.write(jsonString, 'binary');
+                                        client.destroy();
+                                    });
+                                }
+                            }
+                            itemsProcessed++;
+                            if(itemsProcessed == json.files.length) {
+                                if (!fileFound) {
+                                    console.log(fileInDb.filename + ' not found, sending...')
+                                    var client = new net.Socket();
+                                    client.connect(json.user_port, json.user_ip, function () {
+                                        client.write(jsonString, 'binary');
+                                        client.destroy();
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    }
 
     net.createServer(function(socket) {
         socket.on('data', function (data) {
@@ -213,44 +261,7 @@ mb.on('ready', function ready() {
 
             switch (json.msgtype) {
                 case 'compare_hash':
-                    var itemsProcessed = 0;
-                    fileDB.getGroupFiles(json.group_id, function(files) {
-                        files.forEach(function(fileInDb) {
-                            var path = utils.getUserDir() + '/' + json.groupname + '/' + fileInDb.filename;
-                            fs.readFile(path, function (err, data) {
-                                if (err) {
-                                    console.log(err)
-                                }
-                                else {
-                                    var fileFound = false;
-                                    var response_json = {
-                                        msgtype: 'add_file',
-                                        file: fileInDb,
-                                        data: data,
-                                        groupname: json.groupname
-                                    };
-                                    var jsonString = JSON.stringify(response_json);
-                                    json.files.forEach(function(file) {
-                                        if(fileInDb.filename === file.filename) {
-                                            fileFound = true;
-                                            if(file.hash != crypto.createHash('sha256').update(data).digest('hex')){
-                                                socket.write(jsonString, 'binary');
-                                            }
-                                        }
-                                        itemsProcessed++;
-                                        if(itemsProcessed == json.files.length) {
-                                            console.log('fini')
-                                            socket.write(jsonString, 'binary');
-                                            if (!fileFound) {
-
-                                            }
-                                        }
-                                    });
-                                }
-                            });
-                        });
-                    });
-
+                    sendFiles(json);
                     break;
                 case 'add_file':
                     var file_data = new Buffer(json.data.data);
@@ -287,10 +298,9 @@ mb.on('ready', function ready() {
 
                 case 'ask_joinGroup':
                     console.log(json.secret);
-                    var webContents = win.webContents;
                     win.loadURL('file://' + __dirname + '/test.html');
-                    webContents.on('did-finish-load', function() {
-                        webContents.send('ping', json.secret);
+                    win.webContents.on('did-finish-load', function() {
+                        win.webContents.send('ping', json.secret);
                     });
                     win.show();
                     break;
