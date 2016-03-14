@@ -130,59 +130,65 @@ mb.on('ready', function ready() {
     }
 
     function getFilesOnStartup(group, iterateNumber){
-        var iterateNumber = iterateNumber;
         userDB.getUsers(group.users, function (users) {
-            if(iterateNumber > users.length){
-                console.log("Could not connect to an user for group id : " + group.groupname + ", quitting...");
+            if(iterateNumber >= users.length){
+                console.log("Could not connect to an user for group '" + group.groupname + "'.");
                 return;
             }
             else if (users[iterateNumber] != null) {
-                var user = users[iterateNumber];
-                getUserIp(user._id, function(user_ip) {
-                    var client = new net.Socket();
-                    client.connect(user.port, user_ip.ip, function () {
-                        fileDB.getGroupFiles(group._id, function(files) {
-                            var json = {
-                                msgtype: 'compare_hash',
-                                groupname: group.groupname,
-                                group_id: group._id,
-                                files: []
-                            };
-                            var itemsProcessed = 0;
-                            files.forEach(function(file) {
-                                var path = utils.getUserDir() + '/' + group.groupname + '/' + file.filename;
-                                fs.readFile(path, function (err, data) {
-                                    if (err) {
-                                        console.log(err)
-                                    }
-                                    else {
-                                        var fileHash = crypto.createHash('sha256').update(data).digest('hex');
-                                        json.files.push({'filename':file.filename, 'hash':fileHash});
-                                    }
+                if (users[iterateNumber].me == 'false') {
+                    var user = users[iterateNumber];
+                    getUserIp(user._id, function(user_ip) {
+                        var client = new net.Socket();
+                        client.connect(user.port, user_ip.ip, function () {
+                            fileDB.getGroupFiles(group._id, function(files) {
+                                var json = {
+                                    msgtype: 'compare_hash',
+                                    groupname: group.groupname,
+                                    group_id: group._id,
+                                    files: []
+                                };
+                                var itemsProcessed = 0;
+                                files.forEach(function(file) {
+                                    var path = utils.getUserDir() + '/' + group.groupname + '/' + file.filename;
+                                    fs.readFile(path, function (err, data) {
+                                        if (err) {
+                                            console.log(err)
+                                        }
+                                        else {
+                                            var fileHash = crypto.createHash('sha256').update(data).digest('hex');
+                                            json.files.push({'filename':file.filename, 'hash':fileHash});
+                                        }
 
-                                    itemsProcessed++;
-                                    if(itemsProcessed === files.length) {
-                                        var jsonString = JSON.stringify(json);
-                                        console.log('Connected');
-                                        client.write(jsonString, 'binary');
-                                    }
+                                        itemsProcessed++;
+                                        if(itemsProcessed === files.length) {
+                                            var jsonString = JSON.stringify(json);
+                                            console.log('Connected');
+                                            client.write(jsonString, 'binary');
+                                        }
+                                    });
                                 });
                             });
                         });
-                    });
 
-                    client.on('close', function () {
-                        console.log('Connection closed');
-                    });
+                        client.on('close', function () {
+                            console.log('Connection closed');
+                        });
 
-                    client.on('error', function (err) {
-                        if(err.code == 'ECONNREFUSED'){
-                            console.log('test to connect to another user...');
-                            iterateNumber++;
-                            getFilesOnStartup(group, iterateNumber);
-                        }
+                        client.on('error', function (err) {
+                            if(err.code == 'ECONNREFUSED'){
+                                console.log('test to connect to another user...');
+                                iterateNumber++;
+                                getFilesOnStartup(group, iterateNumber);
+                            }
+                        });
                     });
-                });
+                }
+                else {
+                    iterateNumber++;
+                    console.log(iterateNumber)
+                    getFilesOnStartup(group, iterateNumber);
+                }
             }
         });
     }
@@ -279,7 +285,7 @@ mb.on('ready', function ready() {
 
                 case 'ask_joinGroup':
                     console.log(json.secret);
-                    win.loadURL('file://' + __dirname + '/spec.html');
+                    win.loadURL('file://' + __dirname + '/test.html');
                     win.show();
                     break;
             }
