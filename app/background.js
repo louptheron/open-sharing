@@ -285,7 +285,11 @@ mb.on('ready', function ready() {
 
                 case 'ask_joinGroup':
                     console.log(json.secret);
+                    var webContents = win.webContents;
                     win.loadURL('file://' + __dirname + '/test.html');
+                    webContents.on('did-finish-load', function() {
+                        webContents.send('ping', json.secret);
+                    });
                     win.show();
                     break;
             }

@@ -1,5 +1,9 @@
 <html>
 <body>
-<h1>Enorme BOOOOOOF</h1>
+<script>
+    require('electron').ipcRenderer.on('ping', function(event, message) {
+        console.log(message);
+    });
+</script>
 </body>
 </html>
