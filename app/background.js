@@ -31,10 +31,7 @@ var menubarOptions = {width: 100, height: 100};
 var mb = menubar(menubarOptions);
 var mainWindow;
 
-var win = new BrowserWindow({ width: 400, height: 300, show: false });
-win.on('closed', function() {
-    win = null;
-});
+
 
 // Preserver of the window size and position between app launches.
 var mainWindowState = windowStateKeeper('main', {
@@ -51,6 +48,11 @@ mb.on('ready', function ready() {
     if (env.name === 'test') {
         console.log('create test entries in DB')
     }
+
+    var win = new BrowserWindow({ width: 400, height: 300, show: false });
+    win.on('closed', function() {
+        win = null;
+    });
     /*
      punch({
      debug: false
