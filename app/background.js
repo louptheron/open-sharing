@@ -238,9 +238,11 @@ mb.on('ready', function ready() {
                                             }
                                         }
                                         itemsProcessed++;
-                                        if(itemsProcessed === json.files.length) {
+                                        if(itemsProcessed == json.files.length) {
+                                            console.log('fini')
+                                            socket.write(jsonString, 'binary');
                                             if (!fileFound) {
-                                                socket.write(jsonString, 'binary');
+
                                             }
                                         }
                                     });
