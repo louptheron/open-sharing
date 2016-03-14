@@ -42,7 +42,7 @@ export function removeFile(file_id, callback){
 }
 
 export function removeChangedFlagOnFile(file_id){
-    file.update({ _id: file_id }, { $set: { changed: 'true' } }, function (err, numReplaced) {
+    file.update({ _id: file_id }, { $set: { changed: 'false' } }, function (err, numReplaced) {
         file.persistence.compactDatafile();
     });
 }

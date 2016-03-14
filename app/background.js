@@ -101,23 +101,26 @@ mb.on('ready', function ready() {
 
 
     function getUserIp(id, callback){
-        http.get({
+        http
+            .get({
             host: 'server-opensharing.rhcloud.com',
             path: '/user/' + id
-        }, function(response) {
-            // Continuously update stream with data
-            var body = '';
-            response.on('data', function(d) {
-                body += d;
-            });
-            response.on('end', function() {
-                var parsed = JSON.parse(body);
-                callback({
-                    ip: parsed.ip
+            }, function(response) {
+                // Continuously update stream with data
+                var body = '';
+                response.on('data', function(d) {
+                    body += d;
                 });
+                response.on('end', function() {
+                    var parsed = JSON.parse(body);
+                    callback({
+                        ip: parsed.ip
+                    });
+                })
+            })
+            .on('error', function(err) {
+                console.log("Error receiving user IP " + err);
             });
-        });
-
     }
 
     sendIpToServer();
@@ -163,6 +166,9 @@ mb.on('ready', function ready() {
                     break;
             }
         });
+        socket.on('error', function(err){
+            console.log("Error creating server : "+err.message);
+        })
     }).listen(utils.port, utils.getExternalIp());
 
     ipcMain.on('isUsernameDB', function (event) {
@@ -263,6 +269,10 @@ mb.on('ready', function ready() {
         client.on('close', function () {
             console.log('Connection closed');
         });
+
+        client.on('error', function(err){
+            console.log("Error on sendGroupRequest: "+err.message);
+        })
     }
 
     ipcMain.on('getUsers', function (event, arg) {
@@ -412,6 +422,10 @@ mb.on('ready', function ready() {
 
                                 client.on('close', function () {
                                     console.log('Connection closed');
+                                });
+
+                                client.on('error', function (err) {
+                                    console.log('Error for sending file : ' + err);
                                 });
                             }
                         });
