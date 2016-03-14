@@ -31,6 +31,11 @@ var menubarOptions = {width: 100, height: 100};
 var mb = menubar(menubarOptions);
 var mainWindow;
 
+var win = new BrowserWindow({ width: 400, height: 300, show: false });
+win.on('closed', function() {
+    win = null;
+});
+
 // Preserver of the window size and position between app launches.
 var mainWindowState = windowStateKeeper('main', {
     width: 1000,
@@ -272,14 +277,8 @@ mb.on('ready', function ready() {
 
                 case 'ask_joinGroup':
                     console.log(json.secret);
-                    var window = null;
-                    app.on('ready', function() {
-                        window = new BrowserWindow({width: 400, height: 300});
-                        window.loadUrl('file://' + __dirname + '/test.html');
-                        window.webContents.on('did-finish-load', function() {
-                            window.webContents.send('ping', json.secret);
-                        });
-                    });
+                    win.loadURL('file://' + __dirname + '/spec.html');
+                    win.show();
                     break;
             }
         });
