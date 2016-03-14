@@ -5,7 +5,7 @@
 import os from 'os'; // native node.js module
 import { remote } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
-import { inputSecretPhrase, inputUsername , getUsernames, inputCreateGroup,getGroupnames} from './hello_world/hello_world';
+import { inputSecretPhrase, inputUsername , getUsernames, inputCreateGroup,getGroupnames,getChooseUsernames} from './hello_world/hello_world';
 import env from './env';
 const ipcRenderer = require('electron').ipcRenderer;
 
@@ -26,6 +26,12 @@ function showMainPage(){
         ipcRenderer.send('joinGroup', document.getElementById('inputSecretPhrase').value);
     };
 
+    ipcRenderer.on("joinGroup", function (event, msg) {
+        ipcRenderer.send('getGroups');
+        console.log("join group: " + msg);
+    });
+
+
     ipcRenderer.on("getGroups", function (event, arg) {
         if(arg){
             document.getElementById('listsGroup').innerHTML = getGroupnames(arg);
@@ -36,15 +42,24 @@ function showMainPage(){
                     ipcRenderer.on('showGroup', function(event, msg) {
                         document.getElementById('greet').innerHTML = 'Your secret phrase to share : "' + msg.secret + "\"";
                         document.getElementById('listsUser').innerHTML = getUsernames(msg.users);
+                        if(msg.noUsers.length==0){
+                            document.getElementById('addUser').innerHTML = 'All users in group :)';
+                            document.getElementById('listsUserForGroup').innerHTML = null;
+                        }
+                        else{
+                            document.getElementById('addUser').innerHTML = 'Add an user : ';
+                            document.getElementById('listsUserForGroup').innerHTML = getChooseUsernames(msg.noUsers);
+                            for(var l =0;l<msg.noUsers.length;l++){
+                                document.getElementById(l+':u').onclick = function() {
+                                    var test = this.id.split(':');
+                                    ipcRenderer.send('addUserToGroup', msg.noUsers[test[0]],msg.secret);
+                                };
+                            }
+                        }
                     });
                 };
             }
         }
-    });
-
-    ipcRenderer.on("joinGroup", function (event, msg) {
-        ipcRenderer.send('getGroups');
-        console.log("join group: " + msg);
     });
 
     document.getElementById('buttonGroupName').onclick = function() {

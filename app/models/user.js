@@ -41,6 +41,17 @@ export function getUsers(array_id,callback){
     });
 }
 
+export function getUsersNotInArray(array_id,callback){
+    user.find({ _id: { $nin: array_id }}, function (err, docs) {
+        if(!err){
+            return callback(docs);
+        }
+        else{
+            return callback(err);
+        }
+    });
+}
+
 export function removeUser(username,callback){
     user.remove({ username: username }, {}, function (err) {
         if(!err){

@@ -145,7 +145,7 @@ mb.on('ready', function ready() {
                         json.user.port, "false", json.user._id, function (res) {
                             if (!res) {
                                 console.log('bienvenue à : ' +
-                                    json.user.username + ' le gros bof' +
+                                    json.user.username + ' le gros bof ' +
                                     'dans le group : ' + json.group.groupname);
                             }
                             else {
@@ -164,6 +164,18 @@ mb.on('ready', function ready() {
                     groupDB.addUser(json.group._id, json.user._id, function () {
                     });
                     break;
+
+                case 'ask_joinGroup':
+                    console.log(json.secret);
+                    var window = null;
+                    app.on('ready', function() {
+                        window = new BrowserWindow({width: 400, height: 300});
+                        window.loadUrl('file://' + __dirname + '/test.html');
+                        window.webContents.on('did-finish-load', function() {
+                            window.webContents.send('ping', json.secret);
+                        });
+                    });
+                    break;
             }
         });
         socket.on('error', function(err){
@@ -177,7 +189,13 @@ mb.on('ready', function ready() {
         });
     });
 
-    ipcMain.on('joinGroup', function (event, arg) {
+    ipcMain.on('addUserToGroup',function(event,arg1,arg2){
+        getUserIp(arg1._id, function(user_ip){
+            askUserToJoinGroup( arg2,user_ip.ip, arg1.port)
+        });
+    });
+
+    ipcMain.on('joinGroup',function(event,arg){
         if (arg) {
             arg = arg.split(':');
             var group_name = arg[0]
@@ -226,6 +244,28 @@ mb.on('ready', function ready() {
         if (group && user) {
             return group.groupname + ':' + group._id + ':' + user.username +':'+utils.getPort()+':'+ user._id
         }
+    }
+
+    function askUserToJoinGroup( secret,ip, port) {
+        var client = new net.Socket();
+        client.connect(port, ip, function () {
+            console.log('Connected');
+            var json = {
+                msgtype: 'ask_joinGroup',
+                secret: secret
+            };
+            var jsonString = JSON.stringify(json);
+            client.write(jsonString, 'binary');
+            client.destroy();
+        });
+
+        client.on('close', function () {
+            console.log('Connection closed');
+        });
+
+        client.on('error', function(err){
+            console.log("Error on sendGroupRequest: "+err.message);
+        })
     }
 
     function sendGroupRequest(groupInfos, ip, port) {
@@ -387,11 +427,14 @@ mb.on('ready', function ready() {
         userDB.getUser(function (user) {
             if (user) {
                 userDB.getUsers(arg.users, function (res) {
-                    var json = {
-                        secret: getSecretPhrase(arg, user),
-                        users: res
-                    };
-                    event.sender.send('showGroup', json);
+                    userDB.getUsersNotInArray(arg.users,function(resp){
+                        var json = {
+                            secret: getSecretPhrase(arg, user),
+                            users: res,
+                            noUsers:resp
+                        };
+                        event.sender.send('showGroup', json);
+                    });
                 });
             }
         });

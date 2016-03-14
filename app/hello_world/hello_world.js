@@ -24,6 +24,14 @@ export var getGroupnames = function(arg){
     return test;
 };
 
+export var getChooseUsernames = function(arg){
+    var test='';
+    for(var k=0 ; k<arg.length;k++){
+        test+=('<li><a href="#" id="'+k+':u'+'">' + arg[k].username + '</a></li>') ;
+    }
+    return test;
+};
+
 export var inputCreateGroup = function () {
     return '<input type="text" placeholder="Enter Group Name Here" id="inputGroupName"><button id="buttonGroupName">Add Group</button>';
 };
