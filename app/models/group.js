@@ -22,7 +22,7 @@ export function getAllGroups(callback) {
     });
 }
 
-export function getGroup(id,callback) {
+export function getGroup(id, callback) {
    groups.findOne({ _id: id }, function(err, docs) {
         if(!err){
             return callback(docs);

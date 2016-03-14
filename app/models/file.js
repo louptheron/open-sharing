@@ -24,6 +24,13 @@ export function getFileWithGroupId(file_name, group_id, callback) {
     });
 }
 
+export function getGroupFiles(group_id, callback) {
+    file.find({ group_id: group_id }, function (err, docs) {
+        if (callback) {
+            return callback(docs);
+        }
+    });
+}
 
 export function deleteDB(){
     file.remove({}, { multi: true }, function (err, numRemoved) {

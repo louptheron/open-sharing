@@ -19,6 +19,7 @@ var menubar = require('menubar');
 var chokidar = require('chokidar');
 //var punch = require('holepunch');
 var http = require('http');
+const crypto = require('crypto');
 
 
 // Special module holding environment variables which you declared
@@ -60,8 +61,7 @@ mb.on('ready', function ready() {
      });*/
 
 
-// Send New IP address to online server
-
+    // Send New IP address to online server
     function sendIpToServer(){
         userDB.getUser(function (res) {
             if(res != null){
@@ -99,12 +99,11 @@ mb.on('ready', function ready() {
         });
     }
 
-
     function getUserIp(id, callback){
         http
             .get({
-            host: 'server-opensharing.rhcloud.com',
-            path: '/user/' + id
+                host: 'server-opensharing.rhcloud.com',
+                path: '/user/' + id
             }, function(response) {
                 // Continuously update stream with data
                 var body = '';
@@ -123,7 +122,75 @@ mb.on('ready', function ready() {
             });
     }
 
+    function getFilesOnStartup(group, iterateNumber){
+        var iterateNumber = iterateNumber;
+        userDB.getUsers(group.users, function (users) {
+            if(iterateNumber > users.length){
+                console.log("Could not connect to an user for group id : " + group.groupname + ", quitting...");
+                return;
+            }
+            else if (users[iterateNumber] != null) {
+                var user = users[iterateNumber];
+                getUserIp(user._id, function(user_ip) {
+                    var client = new net.Socket();
+                    client.connect(user.port, user_ip.ip, function () {
+                        fileDB.getGroupFiles(group._id, function(files) {
+                            var json = {
+                                msgtype: 'compare_hash',
+                                groupname: group.groupname,
+                                group_id: group._id,
+                                files: []
+                            };
+                            var itemsProcessed = 0;
+                            files.forEach(function(file) {
+                                var path = utils.getUserDir() + '/' + group.groupname + '/' + file.filename;
+                                fs.readFile(path, function (err, data) {
+                                    if (err) {
+                                        console.log(err)
+                                    }
+                                    else {
+                                        var fileHash = crypto.createHash('sha256').update(data).digest('hex');
+                                        json.files.push({'filename':file.filename, 'hash':fileHash});
+                                    }
+
+                                    itemsProcessed++;
+                                    if(itemsProcessed === files.length) {
+                                        var jsonString = JSON.stringify(json);
+                                        console.log('Connected');
+                                        client.write(jsonString, 'binary');
+                                    }
+                                });
+                            });
+                        });
+                    });
+
+                    client.on('close', function () {
+                        console.log('Connection closed');
+                    });
+
+                    client.on('error', function (err) {
+                        if(err.code == 'ECONNREFUSED'){
+                            console.log('test to connect to another user...');
+                            iterateNumber++;
+                            getFilesOnStartup(group, iterateNumber);
+                        }
+                    });
+                });
+            }
+        });
+    }
+
     sendIpToServer();
+
+    // Get files from others users in the group
+    groupDB.getAllGroups(function (res) {
+        if (res) {
+            res.forEach(function (group) {
+                getFilesOnStartup(group, 0);
+            });
+        }
+    });
+
 
     net.createServer(function(socket) {
         socket.on('data', function (data) {
@@ -132,6 +199,44 @@ mb.on('ready', function ready() {
             var json = JSON.parse(data)
 
             switch (json.msgtype) {
+                case 'compare_hash':
+                    var itemsProcessed = 0;
+                    fileDB.getGroupFiles(json.group_id, function(files) {
+                        files.forEach(function(fileInDb) {
+                            var path = utils.getUserDir() + '/' + json.groupname + '/' + fileInDb.filename;
+                            fs.readFile(path, function (err, data) {
+                                if (err) {
+                                    console.log(err)
+                                }
+                                else {
+                                    var fileFound = false;
+                                    var response_json = {
+                                        msgtype: 'add_file',
+                                        file: fileInDb,
+                                        data: data,
+                                        groupname: json.groupname
+                                    };
+                                    var jsonString = JSON.stringify(response_json);
+                                    json.files.forEach(function(file) {
+                                        if(fileInDb.filename === file.filename) {
+                                            fileFound = true;
+                                            if(file.hash != crypto.createHash('sha256').update(data).digest('hex')){
+                                                socket.write(jsonString, 'binary');
+                                            }
+                                        }
+                                        itemsProcessed++;
+                                        if(itemsProcessed === json.files.length) {
+                                            if (!fileFound) {
+                                                socket.write(jsonString, 'binary');
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                        });
+                    });
+
+                    break;
                 case 'add_file':
                     var file_data = new Buffer(json.data.data);
                     fileDB.addFile(json.file.filename, json.file.group_id, json.file._id,

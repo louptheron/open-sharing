@@ -30,7 +30,7 @@ export function deleteDB(){
     });
 }
 
-export function getUsers(array_id,callback){
+export function getUsers(array_id, callback){
     user.find({ _id: { $in: array_id }}, function (err, docs) {
         if(!err){
             return callback(docs);
