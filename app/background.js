@@ -151,25 +151,34 @@ mb.on('ready', function ready() {
                                     files: [],
                                     group_users:group.users
                                 };
+                                var jsonString = JSON.stringify(json);
                                 var itemsProcessed = 0;
-                                files.forEach(function(file) {
-                                    var path = utils.getUserDir() + '/' + group.groupname + '/' + file.filename;
-                                    fs.readFile(path, function (err, data) {
-                                        if (err) {
-                                            console.log(err)
-                                        }
-                                        else {
-                                            var fileHash = crypto.createHash('sha256').update(data).digest('hex');
-                                            json.files.push({'filename':file.filename, 'hash':fileHash});
-                                        }
+                                if(files.length == 0){
+                                    client.write(jsonString, 'binary');
+                                    client.destroy();
+                                }
+                                else {
+                                    console.log('test')
+                                    files.forEach(function(file) {
+                                        var path = utils.getUserDir() + '/' + group.groupname + '/' + file.filename;
+                                        fs.readFile(path, function (err, data) {
+                                            if (err) {
+                                                console.log(err)
+                                            }
+                                            else {
+                                                var fileHash = crypto.createHash('sha256').update(data).digest('hex');
+                                                json.files.push({'filename':file.filename, 'hash':fileHash});
+                                            }
 
-                                        itemsProcessed++;
-                                        if(itemsProcessed === files.length) {
-                                            var jsonString = JSON.stringify(json);
-                                            client.write(jsonString, 'binary');
-                                        }
+                                            itemsProcessed++;
+                                            if(itemsProcessed === files.length) {
+                                                client.write(jsonString, 'binary');
+                                                client.destroy();
+                                            }
+                                        });
                                     });
-                                });
+                                }
+
                             });
                         });
 
