@@ -136,7 +136,7 @@ mb.on('ready', function ready() {
                 return;
             }
             else if (users[iterateNumber] != null) {
-                //if (users[iterateNumber].me == 'false') {
+                if (users[iterateNumber].me == 'false') {
                 var user = users[iterateNumber];
                 getUserIp(user._id, function(user_ip) {
                     var client = new net.Socket();
@@ -185,11 +185,11 @@ mb.on('ready', function ready() {
                         }
                     });
                 });
-                /*}
+                }
                  else {
                  iterateNumber++;
                  getFilesOnStartup(group, iterateNumber);
-                 }*/
+                 }
             }
         });
     }
