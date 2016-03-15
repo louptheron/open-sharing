@@ -103,3 +103,19 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
+ipcRenderer.on('askJoinGroup', function(event, secret){
+    var splitedSecret = secret.split(':');
+    var user = splitedSecret[2];
+    var groupname = splitedSecret[0];
+    document.getElementById('question').innerHTML = "<p> " + user + " want to invite you to a group called '"+ groupname +"', do you want to join it ?</p>"
+    document.getElementById('no').onclick = function(){
+        ipcRenderer.send('askJoinGroup');
+    }
+
+    document.getElementById('yes').onclick = function(){
+        ipcRenderer.send('joinGroup', secret);
+        ipcRenderer.send('askJoinGroup');
+    }
+
+});

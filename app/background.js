@@ -315,9 +315,9 @@ mb.on('ready', function ready() {
 
                 case 'ask_joinGroup':
                     console.log(json.secret);
-                    win.loadURL('file://' + __dirname + '/test.html');
+                    win.loadURL('file://' + __dirname + '/joinGroup.html');
                     win.webContents.on('did-finish-load', function() {
-                        win.webContents.send('ping', json.secret);
+                        win.webContents.send('askJoinGroup', json.secret);
                     });
                     win.show();
                     break;
@@ -334,9 +334,13 @@ mb.on('ready', function ready() {
         });
     });
 
-    ipcMain.on('addUserToGroup',function(event,arg1,arg2){
-        getUserIp(arg1._id, function(user_ip){
-            askUserToJoinGroup( arg2,user_ip.ip, arg1.port)
+    ipcMain.on('askJoinGroup', function (event) {
+        win.close();
+    });
+
+    ipcMain.on('addUserToGroup',function(event,user,secretPhrase){
+        getUserIp(user._id, function(user_ip){
+            askUserToJoinGroup( secretPhrase,user_ip.ip, user.port)
         });
     });
 
@@ -409,7 +413,7 @@ mb.on('ready', function ready() {
         });
 
         client.on('error', function(err){
-            console.log("Error on sendGroupRequest: "+err.message);
+            console.log("Error on askUserToJoinGroup: "+err.message);
         })
     }
 
