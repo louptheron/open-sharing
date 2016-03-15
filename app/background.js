@@ -207,24 +207,22 @@ mb.on('ready', function ready() {
     });
 
     function sendFiles(json){
-        var usersArray = [];
         userDB.getUsersNotInArray(json.group_users,function(users){
-            usersArray=users;
-        });
-        var group_json = {
-            msgtype: 'add_users',
-            group_id: json.group_id,
-            users: usersArray,
-            arrayUsers: json.group_users
-        }
-        var jsonString = JSON.stringify(group_json);
-        var client = new net.Socket();
-        client.connect(json.user_port, json.user_ip, function () {
-            client.write(jsonString, 'binary');
-            client.on('error', function(err){
-                console.log("Error on sendFiles "+err.message);
+            var group_json = {
+                msgtype: 'add_users',
+                group_id: json.group_id,
+                users: users,
+                arrayUsers: json.group_users
+            }
+            var jsonString = JSON.stringify(group_json);
+            var client = new net.Socket();
+            client.connect(json.user_port, json.user_ip, function () {
+                client.write(jsonString, 'binary');
+                client.on('error', function(err){
+                    console.log("Error on sendFiles "+err.message);
+                });
+                client.destroy();
             });
-            client.destroy();
         });
 
         fileDB.getGroupFiles(json.group_id, function(files) {
@@ -240,8 +238,7 @@ mb.on('ready', function ready() {
                             msgtype: 'add_file',
                             file: fileInDb,
                             data: data,
-                            groupname: json.groupname,
-                            users: usersArray
+                            groupname: json.groupname
                         };
                         var jsonString = JSON.stringify(response_json);
                         var itemsProcessed = 0;
