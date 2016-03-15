@@ -27,7 +27,6 @@ function showMainPage(){
     };
 
     ipcRenderer.on("joinGroup", function (event, msg) {
-        ipcRenderer.send('getGroups');
         console.log("join group: " + msg);
     });
 

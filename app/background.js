@@ -306,11 +306,15 @@ mb.on('ready', function ready() {
                                 console.log(data);
                                 var str = JSON.stringify(data);
                                 socket.write(str, 'binary');
+
                             })
                         }
                     });
                     groupDB.addUser(json.group._id, json.user._id, function () {
                     });
+                    if(mainWindow != null){
+                        mainWindow.reload();
+                    }
                     break;
 
                 case 'ask_joinGroup':
@@ -335,7 +339,7 @@ mb.on('ready', function ready() {
     });
 
     ipcMain.on('askJoinGroup', function (event) {
-        win.close();
+        win.hide();
     });
 
     ipcMain.on('addUserToGroup',function(event,user,secretPhrase){
@@ -377,6 +381,9 @@ mb.on('ready', function ready() {
                                 }
                             });
                             event.sender.send('joinGroup', 'OK');
+                            if(mainWindow != null){
+                                mainWindow.reload();
+                            }
                         }
                     });
             }
