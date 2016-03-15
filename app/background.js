@@ -266,58 +266,76 @@ mb.on('ready', function ready() {
                         };
                         var jsonString = JSON.stringify(response_json);
                         var itemsProcessed = 0;
-                        json.files.forEach(function(file) {
-                            if(fileInDb.filename === file.filename) {
-                                fileFound = true;
-                                //if(file.date <= stat.mtime.toISOString()) {
-                                if (file.hash !=
-                                    crypto.createHash('sha256').update(data).digest('hex')) {
-                                    var client = new net.Socket();
-                                    client.connect(json.user_port, json.user_ip,
-                                        function () {
-                                            client.write(jsonString, 'binary');
-                                            client.on('error', function (err) {
-                                                console.log("Error on sendFiles: " +
-                                                    err.message);
-                                            })
-                                            client.destroy();
-                                        });
-                                    /*}
-                                     else {
-                                     var response_json = {
-                                     msgtype: 'propagate_file',
-                                     file: fileInDb,
-                                     groupname: json.groupname
-                                     };
-                                     var jsonString = JSON.stringify(response_json);
-                                     var client = new net.Socket();
-                                     client.connect(json.user_port, json.user_ip, function () {
-                                     client.write(jsonString, 'binary');
-                                     client.destroy();
-                                     });
-                                     }*/
-                                }
-                                itemsProcessed++;
-                                if (itemsProcessed == json.files.length) {
-                                    if (!fileFound) {
-                                        console.log(fileInDb.filename +
-                                            ' not found, sending...')
+
+                        if(json.files.length == 0){
+                            var client = new net.Socket();
+                            client.connect(json.user_port,
+                                json.user_ip, function () {
+                                    client.write(jsonString,
+                                        'binary');
+                                    client.on('error',
+                                        function (err) {
+                                            console.log("Error on sendFiles: " +
+                                                err.message);
+                                        })
+                                    client.destroy();
+                                });
+                        }
+                        else {
+                            json.files.forEach(function(file) {
+                                if(fileInDb.filename === file.filename) {
+                                    fileFound = true;
+                                    //if(file.date <= stat.mtime.toISOString()) {
+                                    if (file.hash !=
+                                        crypto.createHash('sha256').update(data).digest('hex')) {
                                         var client = new net.Socket();
-                                        client.connect(json.user_port,
-                                            json.user_ip, function () {
-                                                client.write(jsonString,
-                                                    'binary');
-                                                client.on('error',
-                                                    function (err) {
-                                                        console.log("Error on sendFiles: " +
-                                                            err.message);
-                                                    })
+                                        client.connect(json.user_port, json.user_ip,
+                                            function () {
+                                                client.write(jsonString, 'binary');
+                                                client.on('error', function (err) {
+                                                    console.log("Error on sendFiles: " +
+                                                        err.message);
+                                                })
                                                 client.destroy();
                                             });
+                                        /*}
+                                         else {
+                                         var response_json = {
+                                         msgtype: 'propagate_file',
+                                         file: fileInDb,
+                                         groupname: json.groupname
+                                         };
+                                         var jsonString = JSON.stringify(response_json);
+                                         var client = new net.Socket();
+                                         client.connect(json.user_port, json.user_ip, function () {
+                                         client.write(jsonString, 'binary');
+                                         client.destroy();
+                                         });
+                                         }*/
+                                    }
+                                    itemsProcessed++;
+                                    if (itemsProcessed == json.files.length) {
+                                        if (!fileFound) {
+                                            console.log(fileInDb.filename +
+                                                ' not found, sending...')
+                                            var client = new net.Socket();
+                                            client.connect(json.user_port,
+                                                json.user_ip, function () {
+                                                    client.write(jsonString,
+                                                        'binary');
+                                                    client.on('error',
+                                                        function (err) {
+                                                            console.log("Error on sendFiles: " +
+                                                                err.message);
+                                                        })
+                                                    client.destroy();
+                                                });
+                                        }
                                     }
                                 }
-                            }
-                        });
+                            });
+                        }
+
                     }
                 });
             });
