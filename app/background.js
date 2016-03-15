@@ -571,20 +571,21 @@ mb.on('ready', function ready() {
                             var client = new net.Socket();
                             client.connect(user.port,
                                 user_ip.ip, function () {
-                                    var json = {
-                                        msgtype: 'delete_user_group',
-                                        group_id: group._id,
-                                        user: user
-                                    }
-                                    var jsonString = JSON.stringify(json);
+                                    userDB.getUser(function(me){
+                                        var json = {
+                                            msgtype: 'delete_user_group',
+                                            group_id: group._id,
+                                            user: me
+                                        }
+                                        var jsonString = JSON.stringify(json);
 
-                                    client.write(jsonString, 'binary');
-                                    client.on('error', function (err) {
-                                        console.log('Error for sending delete_user_group socket : ' +
-                                            err);
+                                        client.write(jsonString, 'binary');
+                                        client.on('error', function (err) {
+                                            console.log('Error for sending delete_user_group socket : ' +
+                                                err);
+                                        });
+                                        client.destroy();
                                     });
-                                    client.destroy();
-
                                 });
                         })
                     }
