@@ -54,6 +54,12 @@ export function removeChangedFlagOnFile(file_id){
     });
 }
 
+export function deleteFiles(group_id){
+    file.remove({ group_id: group_id }, { multi: true }, function (err, numRemoved) {
+        console.log(numRemoved + ' files removed.')
+    });
+}
+
 export function addFile(filename, group_id, file_id, callback) {
     if (file_id != null){
         var doc = {

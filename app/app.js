@@ -35,6 +35,10 @@ function showMainPage(){
         if(arg){
             document.getElementById('listsGroup').innerHTML = getGroupnames(arg);
             for(var k =0;k<arg.length;k++){
+                document.getElementById(k+':d').onclick = function() {
+                    var test = this.id.split(':');
+                    ipcRenderer.send('deleteGroup', arg[test[0]]);
+                };
                 document.getElementById(k).onclick = function() {
                     document.getElementById('titlePage').innerHTML = 'Group : '+ arg[this.id].groupname;
                     ipcRenderer.send('showGroup', arg[this.id]);

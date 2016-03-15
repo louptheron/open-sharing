@@ -229,13 +229,7 @@ mb.on('ready', function ready() {
                                 //if(file.date <= stat.mtime.toISOString()) {
                                 if (file.hash !=
                                     crypto.createHash('sha256').update(data).digest('hex')) {
-                                    var client = new net.Socket();
-                                    client.connect(json.user_port,
-                                        json.user_ip, function () {
-                                            client.write(jsonString,
-                                                'binary');
-                                            client.destroy();
-                                        });
+
                                 }
                                 /*}
                                  else {
@@ -277,6 +271,9 @@ mb.on('ready', function ready() {
             var json = JSON.parse(data)
 
             switch (json.msgtype) {
+                case 'delete_user_group':
+                    groupDB.removeUser(json.group_id, json.user._id)
+                    break;
                 case 'compare_hash':
                     sendFiles(json);
                     break;
@@ -560,7 +557,57 @@ mb.on('ready', function ready() {
         }
     });
 
-    ipcMain.on('addGroup', function (event, arg) {
+
+    ipcMain.on('deleteGroup', function (event, group) {
+        if(group){
+            userDB.getUsers(group.users, function(users){
+                users.forEach(function(user){
+                    getUserIp(user._id, function(user_ip){
+                        var client = new net.Socket();
+                        client.connect(user.port,
+                            user_ip.ip, function () {
+                                var json = {
+                                    msg_type:'delete_user_group',
+                                    group_id: group._id,
+                                    user: user
+                                }
+                                var jsonString = JSON.stringify(json);
+
+                                client.write(jsonString, 'binary');
+                                client.on('error', function (err) {
+                                    console.log('Error for sending delete_user_group socket : ' + err);
+                                });
+                                client.destroy();
+
+                            });
+                    })
+
+                })
+
+            });
+
+            fileDB.deleteFiles(group._id);
+            groupDB.removeGroup(group._id, function(){
+                console.log('test')
+            });
+            const exec = require('child_process').exec;
+            const child = exec('cd ' + utils.getUserDir() + '; rm -r ' + group.groupname,
+                (error, stdout, stderr) => {
+                    console.log(`stdout: ${stdout}`);
+                    console.log(`stderr: ${stderr}`);
+                    if (error !== null) {
+                        console.log(`exec error: ${error}`);
+                    }
+                });
+            if(mainWindow != null){
+                mainWindow.reload();
+            }
+        }
+
+
+    });
+
+        ipcMain.on('addGroup', function (event, arg) {
         if (arg) {
             userDB.getUser(function (user) {
                 groupDB.createGroup(arg, null, user._id, function (res) {

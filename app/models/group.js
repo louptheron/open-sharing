@@ -33,8 +33,8 @@ export function getGroup(id, callback) {
     });
 }
 
-export function removeGroup(groupname,callback){
-    groups.remove({ groupname: groupname }, {}, function (err) {
+export function removeGroup(id, callback){
+    groups.remove({ _id: id }, {}, function (err) {
         groups.persistence.compactDatafile();
         if(!err){
             return callback();
@@ -57,6 +57,11 @@ export function addUser(group_id,user_id){
         groups.persistence.compactDatafile();
 
     }
+}
+
+export function removeUser(group_id, user_id){
+    db.update({ _id: group_id }, { $pull: { users: user_id } }, {});
+    groups.persistence.compactDatafile();
 }
 
 export function addFile(group_id, filename){

@@ -52,8 +52,8 @@ export function getUsersNotInArray(array_id,callback){
     });
 }
 
-export function removeUser(username,callback){
-    user.remove({ username: username }, {}, function (err) {
+export function removeUser(id, callback){
+    user.remove({ _id: id }, {}, function (err) {
         if(!err){
             return callback();
         }

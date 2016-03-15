@@ -19,7 +19,7 @@ export var getUsernames = function(arg){
 export var getGroupnames = function(arg){
     var test='';
     for(var k=0 ; k<arg.length;k++){
-        test+=('<li><a href="#" id="'+k+'">' + arg[k].groupname + '</a></li>') ;
+        test+=('<li><a href="#" id="'+k+'">' + arg[k].groupname + '</a>  -  <a href="#" class="delete" id="'+k+':d'+'">delete</a></li>') ;
     }
     return test;
 };
