@@ -60,7 +60,8 @@ export function addUser(group_id,user_id){
 }
 
 export function removeUser(group_id, user_id){
-    db.update({ _id: group_id }, { $pull: { users: user_id } }, {});
+    groups.update({ _id: group_id }, { $pull: { users: user_id } }, {}, function () {
+    });
     groups.persistence.compactDatafile();
 }
 

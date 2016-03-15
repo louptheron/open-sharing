@@ -272,7 +272,11 @@ mb.on('ready', function ready() {
 
             switch (json.msgtype) {
                 case 'delete_user_group':
-                    groupDB.removeUser(json.group_id, json.user._id)
+                    console.log(json.group_id + json.user._id)
+                    groupDB.removeUser(json.group_id, json.user._id, function(){})
+                    if(mainWindow != null){
+                        mainWindow.reload();
+                    }
                     break;
                 case 'compare_hash':
                     sendFiles(json);
@@ -567,7 +571,7 @@ mb.on('ready', function ready() {
                         client.connect(user.port,
                             user_ip.ip, function () {
                                 var json = {
-                                    msg_type:'delete_user_group',
+                                    msgtype:'delete_user_group',
                                     group_id: group._id,
                                     user: user
                                 }
