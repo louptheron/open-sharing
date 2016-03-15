@@ -381,9 +381,7 @@ mb.on('ready', function ready() {
                     userDB.createUser(json.user.username,
                         json.user.port, "false", json.user._id, function (res) {
                             if (!res) {
-                                console.log('bienvenue à : ' +
-                                    json.user.username + ' le gros bof ' +
-                                    'dans le group : ' + json.group.groupname);
+                                console.log(json.user.username + ' added in group ' + json.group.groupname);
                             }
                             else {
                                 console.log(res);
@@ -547,6 +545,21 @@ mb.on('ready', function ready() {
                         }
                     });
                 groupDB.addUser(groupInfos._id, data[i]._id);
+                userDB.getUser(function(me){
+                    getUserIp(data[i]._id, function(user_ip){
+                        client.connect(data[i].port, ip, function () {
+                            var group_json = {
+                                msgtype: 'add_users',
+                                group_id: groupInfos._id,
+                                users: data[i],
+                                arrayUsers:  groupInfos.users
+                            };
+                            var jsonString = JSON.stringify(group_json);
+                            client.write(jsonString, 'binary');
+                            client.destroy();
+                        });
+                    })
+                });
             }
             client.destroy();
         });
