@@ -565,13 +565,13 @@ mb.on('ready', function ready() {
     ipcMain.on('deleteGroup', function (event, group) {
         if(group) {
             userDB.getUsers(group.users, function (users) {
-                users.forEach(function (user) {
-                    if (user.me == 'false') {
-                        getUserIp(user._id, function (user_ip) {
-                            var client = new net.Socket();
-                            client.connect(user.port,
-                                user_ip.ip, function () {
-                                    userDB.getUser(function(me){
+                userDB.getUser(function(me){
+                    users.forEach(function (user) {
+                        if (user.me == 'false') {
+                            getUserIp(user._id, function (user_ip) {
+                                var client = new net.Socket();
+                                client.connect(user.port,
+                                    user_ip.ip, function () {
                                         var json = {
                                             msgtype: 'delete_user_group',
                                             group_id: group._id,
@@ -586,12 +586,13 @@ mb.on('ready', function ready() {
                                         });
                                         client.destroy();
                                     });
-                                });
-                        })
-                    }
-                });
+                            })
+                        }
+                    });
 
-            })
+                });
+            });
+
 
             fileDB.deleteFiles(group._id);
             groupDB.removeGroup(group._id, function(){
@@ -610,8 +611,6 @@ mb.on('ready', function ready() {
                 mainWindow.reload();
             }
         }
-
-
     });
 
     ipcMain.on('addGroup', function (event, arg) {
