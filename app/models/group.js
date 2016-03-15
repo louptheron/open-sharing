@@ -61,7 +61,7 @@ export function addUser(group_id,user_id){
 
 export function updateGroupUsers(group_id, users) {
     if (Array.isArray(users)) {
-        groups.update({ _id: group_id }, { users: users}, {}, function () {});
+        groups.update({ _id: group_id }, { $set: { users: users}}, {}, function () {});
         groups.persistence.compactDatafile();
     }
 }
