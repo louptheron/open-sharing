@@ -119,9 +119,15 @@ mb.on('ready', function ready() {
                 });
                 response.on('end', function() {
                     var parsed = JSON.parse(body);
-                    callback({
-                        ip: parsed.ip
-                    });
+                    if(parsed != null){
+                        callback({
+                            ip: parsed.ip
+                        });
+                    }
+                    else {
+                        callback({});
+                    }
+
                 })
             })
             .on('error', function(err) {
@@ -139,61 +145,67 @@ mb.on('ready', function ready() {
                 if (users[iterateNumber].me == 'false') {
                     var user = users[iterateNumber];
                     getUserIp(user._id, function(user_ip) {
-                        var client = new net.Socket();
-                        client.connect(user.port, user_ip.ip, function () {
-                            fileDB.getGroupFiles(group._id, function(files) {
-                                var json = {
-                                    user_ip: utils.getExternalIp(),
-                                    user_port: utils.getPort(),
-                                    msgtype: 'compare_hash',
-                                    groupname: group.groupname,
-                                    group_id: group._id,
-                                    files: [],
-                                    group_users:group.users
-                                };
-                                var jsonString = JSON.stringify(json);
-                                var itemsProcessed = 0;
-                                if(files.length == 0){
-                                    client.write(jsonString, 'binary');
-                                    client.destroy();
-                                }
-                                else {
-                                    console.log('test')
-                                    files.forEach(function(file) {
-                                        var path = utils.getUserDir() + '/' + group.groupname + '/' + file.filename;
-                                        fs.readFile(path, function (err, data) {
-                                            if (err) {
-                                                console.log(err)
-                                            }
-                                            else {
-                                                var fileHash = crypto.createHash('sha256').update(data).digest('hex');
-                                                json.files.push({'filename':file.filename, 'hash':fileHash});
-                                            }
+                        if(user_ip.ip != null){
+                            var client = new net.Socket();
+                            client.connect(user.port, user_ip.ip, function () {
+                                fileDB.getGroupFiles(group._id, function(files) {
+                                    var json = {
+                                        user_ip: utils.getExternalIp(),
+                                        user_port: utils.getPort(),
+                                        msgtype: 'compare_hash',
+                                        groupname: group.groupname,
+                                        group_id: group._id,
+                                        files: [],
+                                        group_users:group.users
+                                    };
+                                    var jsonString = JSON.stringify(json);
+                                    var itemsProcessed = 0;
+                                    if(files.length == 0){
+                                        client.write(jsonString, 'binary');
+                                        client.destroy();
+                                    }
+                                    else {
+                                        console.log('test')
+                                        files.forEach(function(file) {
+                                            var path = utils.getUserDir() + '/' + group.groupname + '/' + file.filename;
+                                            fs.readFile(path, function (err, data) {
+                                                if (err) {
+                                                    console.log(err)
+                                                }
+                                                else {
+                                                    var fileHash = crypto.createHash('sha256').update(data).digest('hex');
+                                                    json.files.push({'filename':file.filename, 'hash':fileHash});
+                                                }
 
-                                            itemsProcessed++;
-                                            if(itemsProcessed === files.length) {
-                                                client.write(jsonString, 'binary');
-                                                client.destroy();
-                                            }
+                                                itemsProcessed++;
+                                                if(itemsProcessed === files.length) {
+                                                    client.write(jsonString, 'binary');
+                                                    client.destroy();
+                                                }
+                                            });
                                         });
-                                    });
-                                }
+                                    }
 
+                                });
                             });
-                        });
 
-                        client.on('close', function () {
-                            console.log('Connection closed');
-                        });
+                            client.on('close', function () {
+                                console.log('Connection closed');
+                            });
 
-                        client.on('error', function (err) {
-                            if(err.code == 'ECONNREFUSED' || err.code == 'EHOSTUNREACH'){
-                                console.log('test to connect to another user...');
+                            client.on('error', function (err) {
+                                if(err.code == 'ECONNREFUSED' || err.code == 'EHOSTUNREACH'){
+                                    console.log('test to connect to another user...');
 
-                                iterateNumber++;
-                                getFilesOnStartup(group, iterateNumber);
-                            }
-                        });
+                                    iterateNumber++;
+                                    getFilesOnStartup(group, iterateNumber);
+                                }
+                            });
+                        }
+                        else {
+                            iterateNumber++;
+                            getFilesOnStartup(group, iterateNumber);
+                        }
                     });
                 }
                 else {
@@ -223,7 +235,7 @@ mb.on('ready', function ready() {
                     group_id: json.group_id,
                     users: users,
                     arrayUsers: gr.users
-                }
+                };
                 var jsonString = JSON.stringify(group_json);
                 var client = new net.Socket();
                 client.connect(json.user_port, json.user_ip, function () {
