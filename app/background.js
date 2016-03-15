@@ -137,59 +137,59 @@ mb.on('ready', function ready() {
             }
             else if (users[iterateNumber] != null) {
                 if (users[iterateNumber].me == 'false') {
-                var user = users[iterateNumber];
-                getUserIp(user._id, function(user_ip) {
-                    var client = new net.Socket();
-                    client.connect(user.port, user_ip.ip, function () {
-                        fileDB.getGroupFiles(group._id, function(files) {
-                            var json = {
-                                user_ip: utils.getExternalIp(),
-                                user_port: utils.getPort(),
-                                msgtype: 'compare_hash',
-                                groupname: group.groupname,
-                                group_id: group._id,
-                                files: []
-                            };
-                            var itemsProcessed = 0;
-                            files.forEach(function(file) {
-                                var path = utils.getUserDir() + '/' + group.groupname + '/' + file.filename;
-                                fs.readFile(path, function (err, data) {
-                                    if (err) {
-                                        console.log(err)
-                                    }
-                                    else {
-                                        var fileHash = crypto.createHash('sha256').update(data).digest('hex');
-                                        json.files.push({'filename':file.filename, 'hash':fileHash});
-                                    }
+                    var user = users[iterateNumber];
+                    getUserIp(user._id, function(user_ip) {
+                        var client = new net.Socket();
+                        client.connect(user.port, user_ip.ip, function () {
+                            fileDB.getGroupFiles(group._id, function(files) {
+                                var json = {
+                                    user_ip: utils.getExternalIp(),
+                                    user_port: utils.getPort(),
+                                    msgtype: 'compare_hash',
+                                    groupname: group.groupname,
+                                    group_id: group._id,
+                                    files: []
+                                };
+                                var itemsProcessed = 0;
+                                files.forEach(function(file) {
+                                    var path = utils.getUserDir() + '/' + group.groupname + '/' + file.filename;
+                                    fs.readFile(path, function (err, data) {
+                                        if (err) {
+                                            console.log(err)
+                                        }
+                                        else {
+                                            var fileHash = crypto.createHash('sha256').update(data).digest('hex');
+                                            json.files.push({'filename':file.filename, 'hash':fileHash});
+                                        }
 
-                                    itemsProcessed++;
-                                    if(itemsProcessed === files.length) {
-                                        var jsonString = JSON.stringify(json);
-                                        client.write(jsonString, 'binary');
-                                    }
+                                        itemsProcessed++;
+                                        if(itemsProcessed === files.length) {
+                                            var jsonString = JSON.stringify(json);
+                                            client.write(jsonString, 'binary');
+                                        }
+                                    });
                                 });
                             });
                         });
-                    });
 
-                    client.on('close', function () {
-                        console.log('Connection closed');
-                    });
+                        client.on('close', function () {
+                            console.log('Connection closed');
+                        });
 
-                    client.on('error', function (err) {
-                        if(err.code == 'ECONNREFUSED' || err.code == 'EHOSTUNREACH'){
-                            console.log('test to connect to another user...');
+                        client.on('error', function (err) {
+                            if(err.code == 'ECONNREFUSED' || err.code == 'EHOSTUNREACH'){
+                                console.log('test to connect to another user...');
 
-                            iterateNumber++;
-                            getFilesOnStartup(group, iterateNumber);
-                        }
+                                iterateNumber++;
+                                getFilesOnStartup(group, iterateNumber);
+                            }
+                        });
                     });
-                });
                 }
-                 else {
-                 iterateNumber++;
-                 getFilesOnStartup(group, iterateNumber);
-                 }
+                else {
+                    iterateNumber++;
+                    getFilesOnStartup(group, iterateNumber);
+                }
             }
         });
     }
@@ -563,32 +563,34 @@ mb.on('ready', function ready() {
 
 
     ipcMain.on('deleteGroup', function (event, group) {
-        if(group){
-            userDB.getUsers(group.users, function(users){
-                users.forEach(function(user){
-                    getUserIp(user._id, function(user_ip){
-                        var client = new net.Socket();
-                        client.connect(user.port,
-                            user_ip.ip, function () {
-                                var json = {
-                                    msgtype:'delete_user_group',
-                                    group_id: group._id,
-                                    user: user
-                                }
-                                var jsonString = JSON.stringify(json);
+        if(group) {
+            userDB.getUsers(group.users, function (users) {
+                users.forEach(function (user) {
+                    if (user.me == 'false') {
+                        getUserIp(user._id, function (user_ip) {
+                            var client = new net.Socket();
+                            client.connect(user.port,
+                                user_ip.ip, function () {
+                                    var json = {
+                                        msgtype: 'delete_user_group',
+                                        group_id: group._id,
+                                        user: user
+                                    }
+                                    var jsonString = JSON.stringify(json);
 
-                                client.write(jsonString, 'binary');
-                                client.on('error', function (err) {
-                                    console.log('Error for sending delete_user_group socket : ' + err);
+                                    client.write(jsonString, 'binary');
+                                    client.on('error', function (err) {
+                                        console.log('Error for sending delete_user_group socket : ' +
+                                            err);
+                                    });
+                                    client.destroy();
+
                                 });
-                                client.destroy();
+                        })
+                    }
+                });
 
-                            });
-                    })
-
-                })
-
-            });
+            })
 
             fileDB.deleteFiles(group._id);
             groupDB.removeGroup(group._id, function(){
@@ -611,7 +613,7 @@ mb.on('ready', function ready() {
 
     });
 
-        ipcMain.on('addGroup', function (event, arg) {
+    ipcMain.on('addGroup', function (event, arg) {
         if (arg) {
             userDB.getUser(function (user) {
                 groupDB.createGroup(arg, null, user._id, function (res) {
