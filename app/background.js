@@ -41,6 +41,10 @@ var mainWindowState = windowStateKeeper('main', {
 
 mb.on('ready', function ready() {
 
+    if (env.name === 'test') {
+        openApp();
+    }
+
     mb.on('after-create-window', function () {
         //mb.window.openDevTools();
     });
@@ -608,7 +612,7 @@ mb.on('ready', function ready() {
         }
     });
 
-    ipcMain.on('openApp', function (event, arg) {
+    function openApp(){
         mainWindow = new BrowserWindow({
             x: mainWindowState.x,
             y: mainWindowState.y,
@@ -638,6 +642,10 @@ mb.on('ready', function ready() {
             }
             app.quit();
         });
+    }
+
+    ipcMain.on('openApp', function (event, arg) {
+        openApp();
     });
 
     ipcMain.on('quitApp', function () {
@@ -646,16 +654,25 @@ mb.on('ready', function ready() {
 
     ipcMain.on('setUsername', function (event, arg) {
         if (arg) {
-            userDB.createUser(arg, utils.port,
-                "true", null, function (res) {
-                    if (res) {
-                        event.sender.send('setUsername', 'ERR: ' + res);
-                    }
-                    else {
-                        event.sender.send('setUsername', 'OK');
-                        sendIpToServer();
-                    }
-                });
+            userDB.getUser(function(user){
+                if(!user){
+                    userDB.createUser(arg, utils.port,
+                        "true", null, function (res) {
+
+                            if (res) {
+                                event.sender.send('setUsername', 'ERR: ' + res);
+                            }
+                            else {
+                                event.sender.send('setUsername', 'OK');
+                                sendIpToServer();
+                            }
+                        });
+                }
+                else {
+                    event.sender.send('setUsername', 'OK');
+                }
+
+            })
         }
         else {
             event.sender.send('setUsername', 'No Data');
