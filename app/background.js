@@ -549,20 +549,28 @@ mb.on('ready', function ready() {
                         }
                     });
                 groupDB.addUser(groupInfos._id, data[i]._id);
-                userDB.getUser(function(me){
-                    getUserIp(data[i]._id, function(user_ip){
-                        client.connect(data[i].port, ip, function () {
-                            var group_json = {
-                                msgtype: 'add_users',
-                                group_id: groupInfos._id,
-                                users: data[i],
-                                arrayUsers:  groupInfos.users
-                            };
-                            var jsonString = JSON.stringify(group_json);
-                            client.write(jsonString, 'binary');
-                            client.destroy();
-                        });
-                    })
+
+
+                var me = userDB.getUser(function(me){
+                    return me;
+                });
+
+                var user_ip = getUserIp(data[i]._id, function(user_ip){
+                    return user_ip
+                })
+
+                client.connect(data[i].port, user_ip, function () {
+                    console.log(groupInfos._id)
+
+                    var group_json = {
+                        msgtype: 'add_users',
+                        group_id: groupInfos._id,
+                        users: me,
+                        arrayUsers:  groupInfos.users
+                    };
+                    var jsonString = JSON.stringify(group_json);
+                    client.write(jsonString, 'binary');
+                    client.destroy();
                 });
             }
             client.destroy();
