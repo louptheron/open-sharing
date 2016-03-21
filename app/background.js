@@ -124,12 +124,22 @@ mb.on('ready', function ready() {
                 response.on('end', function() {
                     var parsed = JSON.parse(body);
                     if(parsed != null){
-                        callback({
-                            ip: parsed.ip
-                        });
+                        if(callback){
+                            callback({
+                                ip: parsed.ip
+                            });
+                        }
+                        else {
+                            return {ip: parsed.ip};
+                        }
                     }
                     else {
-                        callback({});
+                        if(callback){
+                            callback({});
+                        }
+                        else {
+                            return {ip: 'error'};
+                        }
                     }
 
                 })
@@ -539,43 +549,42 @@ mb.on('ready', function ready() {
             console.log(data);
             data = JSON.parse(data);
 
-            var me = userDB.getUser(function(me){
-                return me;
-            });
 
-            for (var i = 0; i < data.length; i++) {
-                userDB.createUser(data[i].username,
-                    data[i].port, "false", data[i]._id, function (res) {
-                        if (!res) {
-                            console.log('add "' + data[i].username +
-                                '" in the group "' + groupInfos.groupname + '".');
-                        }
-                        else {
-                            console.log(res);
-                        }
+
+            data.forEach(function(user){
+                userDB.getUser(function(me){
+                    getUserIp(user._id, function(user_ip){
+                        console.log('haha' + user.port + user_ip.ip)
+
+                        userDB.createUser(user.username,
+                            user.port, "false", user._id, function (res) {
+                                if (!res) {
+                                    console.log('add "' + user.username +
+                                        '" in the group "' + groupInfos.groupname + '".');
+                                }
+                                else {
+                                    console.log(res);
+                                }
+                            });
+                        groupDB.addUser(groupInfos._id, user._id);
+
+                        var client2 = new net.Socket();
+
+                        client2.connect(user.port, user_ip.ip, function () {
+                            var group_json = {
+                                msgtype: 'add_users',
+                                group_id: groupInfos._id,
+                                users: [me],
+                                arrayUsers:  groupInfos.users
+                            };
+                            var jsonString = JSON.stringify(group_json);
+                            client2.write(jsonString, 'binary');
+                            client2.destroy();
+                        });
+                        client.destroy();
                     });
-                groupDB.addUser(groupInfos._id, data[i]._id);
-
-
-                var user_ip = getUserIp(data[i]._id, function(user_ip){
-                    return user_ip
-                })
-
-                client.connect(data[i].port, user_ip, function () {
-                    console.log(groupInfos._id)
-
-                    var group_json = {
-                        msgtype: 'add_users',
-                        group_id: groupInfos._id,
-                        users: me,
-                        arrayUsers:  groupInfos.users
-                    };
-                    var jsonString = JSON.stringify(group_json);
-                    client.write(jsonString, 'binary');
-                    client.destroy();
                 });
-            }
-            client.destroy();
+            })
         });
 
         client.on('close', function () {
