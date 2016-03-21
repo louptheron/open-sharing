@@ -533,10 +533,16 @@ mb.on('ready', function ready() {
             });
         });
 
+
         client.on('data', function (data) {
             data = data.toString();
             console.log(data);
             data = JSON.parse(data);
+
+            var me = userDB.getUser(function(me){
+                return me;
+            });
+
             for (var i = 0; i < data.length; i++) {
                 userDB.createUser(data[i].username,
                     data[i].port, "false", data[i]._id, function (res) {
@@ -550,10 +556,6 @@ mb.on('ready', function ready() {
                     });
                 groupDB.addUser(groupInfos._id, data[i]._id);
 
-
-                var me = userDB.getUser(function(me){
-                    return me;
-                });
 
                 var user_ip = getUserIp(data[i]._id, function(user_ip){
                     return user_ip
