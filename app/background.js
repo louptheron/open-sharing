@@ -570,17 +570,20 @@ mb.on('ready', function ready() {
 
                         var client2 = new net.Socket();
 
-                        client2.connect(user.port, user_ip.ip, function () {
-                            var group_json = {
-                                msgtype: 'add_users',
-                                group_id: groupInfos._id,
-                                users: [me],
-                                arrayUsers:  groupInfos.users
-                            };
-                            var jsonString = JSON.stringify(group_json);
-                            client2.write(jsonString, 'binary');
-                            client2.destroy();
-                        });
+                        groupDB.getGroup(groupInfos._id, function(groupInfos){
+                            client2.connect(user.port, user_ip.ip, function () {
+                                var group_json = {
+                                    msgtype: 'add_users',
+                                    group_id: groupInfos._id,
+                                    users: [me],
+                                    arrayUsers:  groupInfos.users
+                                };
+                                var jsonString = JSON.stringify(group_json);
+                                client2.write(jsonString, 'binary');
+                                client2.destroy();
+                            });
+                        })
+
                         client.destroy();
                     });
                 });
