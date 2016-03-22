@@ -1,13 +1,24 @@
 import * as utils from '../controllers/utils'
-
-export var inputSecretPhrase = function () {
-    return '<input type="text" placeholder="Enter secret phrase here" id="inputSecretPhrase"><br><button id="buttonSecret">Join</button>';
-};
-
+/*
 export var inputUsername = function () {
-    return '<input type="text" placeholder="Enter you username here" id="inputUsername"><br><button id="buttonUsername">Go !</button>';
+    var box'<div class="row">'+
+    '<div class="col s12 m5">'+
+    '<div class="card-panel teal">'+
+    '<span class="white-text">You don\'t have any group for the moment, join a friend\'s group or create a new one !'+
+    '</span>'+
+    '</div>'+
+    '</div>'+
+    '</div>';
+    var box += '<p>It seems that it is the first time you are using OpenSharing, let\'s create your username !</p>';
+        box = '<div class="row">';
+        box += '<div class="input-field col s12">';
+        box += '<input placeholder="Enter you username here" id="inputUsername" type="text">';
+        box += '<a href="#" class="waves-effect waves-light btn" id="buttonUsername">Go !</a>';
+        box += '</div>';
+        box += '</div>';
+    return box;
 };
-
+*/
 export var getUsernames = function(arg){
     var test='';
     for(var k=0 ; k<arg.length;k++){
@@ -22,6 +33,17 @@ export var getUsernames = function(arg){
     return test;
 };
 
+export var noGroups = function(){
+    return '<div class="row">'+
+        '<div class="col s12 m5">'+
+        '<div class="card-panel teal">'+
+        '<span class="white-text">You don\'t have any group for the moment, join a friend\'s group or create a new one !'+
+        '</span>'+
+        '</div>'+
+        '</div>'+
+        '</div>';
+};
+
 export var getGroupnames = function(groups){
     var test='';
     groups.forEach(function(group){
@@ -34,7 +56,7 @@ export var getGroupnames = function(groups){
         test+=('    <div id="'+group._id+':listsUserForGroup"></div>');
         test+=('</div>') ;
         test+=('<div class="card-action">') ;
-        test+=('<a href="#" >View</a>') ;
+        test+=('<a href="#">View</a>') ;
         test+=('<a href="#" class="delete" id="'+group._id+':d'+'">delete</a>') ;
         test+=('<a class="waves-effect waves-light btn modal-trigger" id="test" href="#modal1">Share</a>') ;
         test+=('</div>') ;
@@ -42,7 +64,7 @@ export var getGroupnames = function(groups){
         test+=('</div>') ;
 
         //test+=('<li><a href="#" id="'+k+'">' + arg[k].groupname + '</a>  -  <a href="#" class="delete" id="'+k+':d'+'">delete</a></li>') ;
-    })
+    });
     return test;
 };
 
@@ -53,9 +75,4 @@ export var getChooseUsernames = function(arg){
     }
     return test;
 };
-
-export var inputCreateGroup = function () {
-    return '<input type="text" placeholder="Enter Group Name Here" id="inputGroupName"><button id="buttonGroupName">Add Group</button>';
-};
-
 

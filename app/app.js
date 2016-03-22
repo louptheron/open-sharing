@@ -5,23 +5,24 @@
 import os from 'os'; // native node.js module
 import { remote } from 'electron'; // native electron module
 import jetpack from 'fs-jetpack'; // module loaded from npm
-import { inputSecretPhrase, inputUsername , getUsernames, inputCreateGroup,getGroupnames,getChooseUsernames} from './hello_world/hello_world';
+import { noGroups, getUsernames, getGroupnames,getChooseUsernames} from './hello_world/hello_world';
 import env from './env';
 const ipcRenderer = require('electron').ipcRenderer;
 /*
-window.$ = window.jQuery = require('./js/jquery-2.1.4.min.js');
-window.Hammer = require('./js/hammer.min.js');
-window.materialize = require('./js/materialize.js');
-document.getElementById('modal-trigger').onClick = window.materialize.leanModal();
-*/
+ window.$ = window.jQuery = require('./js/jquery-2.1.4.min.js');
+ window.Hammer = require('./js/hammer.min.js');
+ window.materialize = require('./js/materialize.js');
+ document.getElementById('modal-trigger').onClick = window.materialize.leanModal();
+ */
 
 var app = remote.app;
 var appDir = jetpack.cwd(app.getAppPath());
 var dbOK = false;
 var usernameSetAtStartup = false;
 
-
 function showMainPage(){
+    $('.collapsible').show();
+    $('#firstUse').hide();
     ipcRenderer.send('getGroups');
 
     document.getElementById('buttonSecret').onclick = function() {
@@ -32,45 +33,56 @@ function showMainPage(){
         console.log("join group: " + msg);
     });
 
-
     ipcRenderer.on("getGroups", function (event, arg) {
-        if(arg){
+        if(arg.length !== 0){
             document.getElementById('listsGroup').innerHTML = getGroupnames(arg);
-                arg.forEach(function(group){
-                    console.log(group._id)
-                    document.getElementById(group._id+':d').onclick = function() {
-                        var test = this.id.split(':');
-                        ipcRenderer.send('deleteGroup', group);
-                    };
-                    document.getElementById(group._id).onclick = function() {
-                        ipcRenderer.send('showGroup', group);
-                        ipcRenderer.on('showGroup', function(event, msg) {
-                            document.getElementById('greet').innerHTML = 'Your secret phrase to share : "' + msg.secret + "\"";
-                            console.log(msg.group_id+':listsUser');
-                            document.getElementById(msg.group_id+':listsUser').innerHTML = getUsernames(msg.users);
-                            if(msg.noUsers.length==0){
-                                document.getElementById(msg.group_id+':addUser').innerHTML = 'All your friends are in the group.';
-                                document.getElementById(msg.group_id+':listsUserForGroup').innerHTML = null;
+            arg.forEach(function(group){
+
+                document.getElementById(group._id+':d').onclick = function() {
+                    ipcRenderer.send('deleteGroup', group);
+                };
+
+                document.getElementById(group._id).onclick = function() {
+                    ipcRenderer.send('showGroup', group);
+                    ipcRenderer.on('showGroup', function(event, msg) {
+
+                        document.getElementById('greet').innerHTML = '<p>Copy this secret phrase and send it to the friend you want to invite : </p><p>' + msg.secret + '</p>';
+                        document.getElementById(msg.group_id+':listsUser').innerHTML = getUsernames(msg.users);
+
+                        if(msg.noUsers.length==0){
+                            document.getElementById(msg.group_id+':addUser').innerHTML = null;
+                            document.getElementById(msg.group_id+':listsUserForGroup').innerHTML = null;
+                        }
+                        else{
+                            document.getElementById(msg.group_id+':addUser').innerHTML = '<p>Add an user : </p>';
+                            document.getElementById(msg.group_id+':listsUserForGroup').innerHTML = getChooseUsernames(msg.noUsers);
+                            console.log(msg.noUsers)
+
+                            // TODO: Bug à corriger, affiche '0:u' à la place de l'id
+                            for(var i=0; i<msg.noUsers.length; i++){
+                                document.getElementById(msg.noUsers[i]._id+':u').onclick = function() {
+                                    ipcRenderer.send('addUserToGroup', msg.noUsers[i], msg.secret);
+                                };
                             }
-                            else{
-                                document.getElementById(msg.group_id+':addUser').innerHTML = 'Add an user : ';
-                                document.getElementById(msg.group_id+':listsUserForGroup').innerHTML = getChooseUsernames(msg.noUsers);
-                                    msg.noUsers.forEach(function(user){
-                                        document.getElementById(user._id+':u').onclick = function() {
-                                            var test = this.id.split(':');
-                                            ipcRenderer.send('addUserToGroup', user, msg.secret);
-                                        };
-                                    });
-                            }
-                        });
-                    };
-                })
+                           /* msg.noUsers.forEach(function(user){
+                                var id = user._id;
+                                document.getElementById(id+':u').onclick = function() {
+                                    ipcRenderer.send('addUserToGroup', user, msg.secret);
+                                };
+                            });*/
+                        }
+                    });
+                };
+            })
+            $('.modal-trigger').leanModal({
+                dismissible: true, // Modal can be dismissed by clicking outside of the modal
+                in_duration: 300, // Transition in duration
+                out_duration: 200 // Transition out duration
+            });
         }
-        $('.modal-trigger').leanModal({
-            dismissible: true, // Modal can be dismissed by clicking outside of the modal
-            in_duration: 300, // Transition in duration
-            out_duration: 200 // Transition out duration
-        });
+        else {
+            document.getElementById('listsGroup').innerHTML = noGroups();
+        }
     });
 
     document.getElementById('buttonGroupName').onclick = function() {
@@ -82,16 +94,13 @@ function showMainPage(){
         console.log("Add Group : " + msg);
     });
 
-
-    $('.collapsible').collapsible({
-        accordion : false // A setting that changes the collapsible behavior to expandable instead of the default accordion style
+    document.getElementById("close-btn").addEventListener("click", function (e) {
+        ipcRenderer.send('closeWindow')
     });
 }
 
 function createUser(){
-    document.getElementById('titleContainer').innerHTML = 'Your User';
-    document.getElementById('greet').innerHTML = 'Create User';
-    document.getElementById('inputBox').innerHTML = inputUsername();
+    $('.collapsible').hide();
     document.getElementById('buttonUsername').onclick = function() {
         ipcRenderer.send('setUsername', document.getElementById('inputUsername').value);
     };

@@ -5,11 +5,18 @@
     <link href="./css/design.css" rel="stylesheet" type="text/css">
 </head>
 <body>
-  <button class="blue darken-1" id="openApp">Open App</button>
+<div id="row">
+    <a  class="waves-effect waves-light btn blue darken-1" id="openApp">Open App</a>
+    <a  class="waves-effect waves-light btn grey darken-1" id="quitApp">Quit</a>
+</div>
   <script src="vendor/electron_boilerplate/context_menu.js"></script>
   <script src="vendor/electron_boilerplate/external_links.js"></script>
-  <script src="daemon.js"></script>
-  <script src="js/jquery-2.1.4.min.js"></script>
+  <script>
+      window.jQuery = window.$ = require('jquery');
+      window.Hammer = require('./js/hammer.min.js');
+  </script>
   <script src="js/materialize.js"></script>
+  <script src="daemon.js"></script>
+
 </body>
 </html>

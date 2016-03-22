@@ -10,11 +10,36 @@
 <body>
 <!-- Page Layout here -->
 <main>
-    <div class="row">
-        <div id="listsGroup"></div>
+    <div class="row blue darken-3" >
+        <div class="col s2"><a href="#" id="close-btn">Close Window</a></div>
+        <div class="col s10" style="-webkit-app-region: drag">Move</div>
     </div>
 
+    <div id="firstUse">
+        <div class="row">
+        <div class="col s12 m12">
+            <h4>Create Account</h4>
+            <div class="card-panel teal">
+                <span class="white-text">
+                    <p>It seems that it is the first time you are using OpenSharing, let's create your username !</p>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input placeholder="Enter you username here" id="inputUsername" type="text">
+                            <a href="#" class="waves-effect waves-light btn" id="buttonUsername">Go !</a>
+                        </div>
+                    </div>
+                </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <h4 id="titleContainer"></h4>
+        <div id="firstTime"></div>
+        <div id="inputBox"></div>
 
+        <div id="listsGroup"></div>
+    </div>
 
     <!-- Modal Structure -->
     <div id="modal1" class="modal">
@@ -36,7 +61,7 @@
                     <div class="row">
                         <div class="input-field col s12">
                             <input placeholder="Enter the secret phrase here" id="inputSecretPhrase" type="text">
-                            <a  class="waves-effect waves-light btn" id="buttonSecret">Join Group</a>
+                            <a href="#" class="waves-effect waves-light btn" id="buttonSecret">Join Group</a>
                         </div>
                     </div>
                 </div>
@@ -46,8 +71,8 @@
                 <div class="collapsible-body" style="background-color:white;">
                     <div class="row">
                         <div class="input-field col s12">
-                            <input type="text" placeholder="Enter you username here" id="inputUsername">
-                            <a  class="waves-effect waves-light btn" id="buttonUsername">Go !</a>
+                            <input type="text" placeholder="Enter the group name here" id="inputGroupName">
+                            <a href="#" class="waves-effect waves-light btn" id="buttonGroupName">Go !</a>
                         </div>
                     </div>
                 </div>
@@ -56,7 +81,7 @@
     </div>
     <div class="footer-copyright">
         <div class="container">
-            © 2015 Open Sharing
+            © 2016 Open Sharing
         </div>
     </div>
 </footer>
@@ -67,7 +92,6 @@
     window.Hammer = require('./js/hammer.min.js');
 </script>
 <script src="js/materialize.js"></script>
-
 <script src="app.js"></script>
 
 </body>

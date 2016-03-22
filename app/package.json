@@ -9,10 +9,15 @@
   "main": "background.js",
   "dependencies": {
     "chokidar": "^1.4.2",
+    "freedom-for-node": "^0.2.18",
+    "freedom-port-control": "^0.9.11",
+    "freedom-xhr": "0.0.9",
     "fs-jetpack": "^0.7.0",
     "holepunch": "^1.0.0-alpha.2",
+    "jquery": "^2.2.2",
     "menubar": "^3.0.0",
     "nat-pmp": "^1.0.0",
-    "nedb": "^1.7.1"
+    "nedb": "^1.7.1",
+    "pmp": "^0.5.0"
   }
 }

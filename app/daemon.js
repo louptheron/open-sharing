@@ -18,16 +18,30 @@ ADD ipc connection to background process which create the main windows when the 
  */
 
 document.addEventListener('DOMContentLoaded', function () {
-        if(document.getElementById('openApp') != null){
-        document.getElementById('openApp').onclick = function() {
-            ipcRenderer.send('openApp');
 
-            document.getElementById('openApp').id = 'quitApp';
-            document.getElementById('quitApp').innerHTML = 'Shutdown Sharing';
-            document.getElementById('quitApp').onclick = function() {
-                ipcRenderer.send('quitApp');
-            };
-        };
+        if(document.getElementById('openApp') != null){
+            showApp()
+            function showApp(){
+                document.getElementById('openApp').innerHTML = 'Open App';
+                document.getElementById('openApp').onclick = function() {
+                    ipcRenderer.send('openApp');
+                    document.getElementById('openApp').id = 'hideApp';
+                    hideApp();
+                };
+            }
+
+            function hideApp(){
+                document.getElementById('hideApp').innerHTML = 'Hide App';
+                document.getElementById('hideApp').onclick = function() {
+                    ipcRenderer.send('closeWindow');
+                    document.getElementById('hideApp').id = 'openApp';
+                    showApp();
+                };
+            }
+
+
+
+
     }
 
 });

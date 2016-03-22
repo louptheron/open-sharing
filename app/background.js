@@ -25,12 +25,10 @@ const crypto = require('crypto');
 // in config/env_xxx.json file.
 import env from './env';
 
-var menubarOptions = {width: 100, height: 100};
+var menubarOptions = {width: 235, height: 36};
 
 var mb = menubar(menubarOptions);
 var mainWindow;
-
-
 
 // Preserver of the window size and position between app launches.
 var mainWindowState = windowStateKeeper('main', {
@@ -52,7 +50,7 @@ mb.on('ready', function ready() {
         console.log('create test entries in DB')
     }
 
-    var win = new BrowserWindow({ width: 400, height: 300, show: false });
+    var win = new BrowserWindow({ width: 400, height: 200, show: false });
     win.on('closed', function() {
         win = null;
     });
@@ -69,8 +67,6 @@ mb.on('ready', function ready() {
      }, function (err) {
      console.log(err);
      });*/
-
-
 
     // Send New IP address to online server
     function sendIpToServer(){
@@ -641,7 +637,8 @@ mb.on('ready', function ready() {
             x: mainWindowState.x,
             y: mainWindowState.y,
             width: mainWindowState.width,
-            height: mainWindowState.height
+            height: mainWindowState.height,
+            frame: false
         });
 
         if (mainWindowState.isMaximized) {
@@ -674,6 +671,14 @@ mb.on('ready', function ready() {
 
     ipcMain.on('quitApp', function () {
         app.quit();
+    });
+
+    ipcMain.on('closeWindow', function () {
+        mainWindow.hide();
+    });
+
+    ipcMain.on('showWindow', function () {
+        mainWindow.hide();
     });
 
     ipcMain.on('setUsername', function (event, arg) {
