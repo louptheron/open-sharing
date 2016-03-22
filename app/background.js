@@ -17,7 +17,6 @@ import windowStateKeeper from './vendor/electron_boilerplate/window_state';
 const ipcMain = require('electron').ipcMain;
 var menubar = require('menubar');
 var chokidar = require('chokidar');
-//var punch = require('holepunch');
 var http = require('http');
 const crypto = require('crypto');
 
@@ -70,6 +69,7 @@ mb.on('ready', function ready() {
      }, function (err) {
      console.log(err);
      });*/
+
 
 
     // Send New IP address to online server
@@ -366,8 +366,10 @@ mb.on('ready', function ready() {
                 case 'add_users':
                     if (json.users.length!=0){
                         json.users.forEach(function(user){
-                            userDB.createUser(user.username, user.port, 'false', user._id, function(){
-                                console.log('add user ' + user.username);
+                            userDB.createUser(user.username, user.port, 'false', user._id, function(res){
+                                if(res){
+                                    console.log(res);
+                                }
                             })
                         });
                     }
@@ -778,6 +780,7 @@ mb.on('ready', function ready() {
                 userDB.getUsers(arg.users, function (res) {
                     userDB.getUsersNotInArray(arg.users,function(resp){
                         var json = {
+                            group_id: arg._id,
                             secret: getSecretPhrase(arg, user),
                             users: res,
                             noUsers:resp
