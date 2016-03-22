@@ -8,45 +8,51 @@
     <link href="./css/design.css" rel="stylesheet" type="text/css">
 </head>
 <body>
-<header>
-    <nav>
-        <div class="nav-wrapper blue darken-1">
-            <a href="#" class="brand-logo">Open Sharing</a>
-            <ul id="nav-mobile" class="right hide-on-med-and-down">
-                <li><a href="sass.html">Mon Compte</a></li>
-                <li><a href="collapsible.html">Aide</a></li>
-            </ul>
-        </div>
-    </nav>
-</header>
 <!-- Page Layout here -->
 <main>
     <div class="row">
-        <div class="col s12 m4 l3  blue lighten-5 full_height">
-            <h5 id="titleContainer"></h5>
-            <div>
-                <ul id="listsGroup"></ul>
-            </div>
-            <div id="inputBox"></div>
-            <div id="createGroup"></div>
+        <div id="listsGroup"></div>
+    </div>
+
+
+
+    <!-- Modal Structure -->
+    <div id="modal1" class="modal">
+        <div class="modal-content">
+            <h4>Share</h4>
+            <p id="greet"></p>
         </div>
-        <div class="col s12 m8 l9">
-            <div class="">
-                <h2 id="titlePage">Groups</h2>
-                <div id="listsUser"></div>
-                <h3 id="addUser" ></h3>
-                <div id="listsUserForGroup"></div>
-            </div>
+        <div class="modal-footer">
+            <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Close</a>
         </div>
     </div>
 </main>
 <footer class="page-footer blue darken-1">
     <div class="container">
-        <div class="row">
-            <div class="col l12 s12">
-                <h5 id="greet"></h5>
-            </div>
-        </div>
+        <ul class="collapsible" data-collapsible="accordion">
+            <li>
+                <div class="collapsible-header">Join a group</div>
+                <div class="collapsible-body" style="background-color:white;">
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input placeholder="Enter the secret phrase here" id="inputSecretPhrase" type="text">
+                            <a  class="waves-effect waves-light btn" id="buttonSecret">Join Group</a>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="collapsible-header">Create a group</div>
+                <div class="collapsible-body" style="background-color:white;">
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input type="text" placeholder="Enter you username here" id="inputUsername">
+                            <a  class="waves-effect waves-light btn" id="buttonUsername">Go !</a>
+                        </div>
+                    </div>
+                </div>
+            </li>
+        </ul>
     </div>
     <div class="footer-copyright">
         <div class="container">
@@ -56,9 +62,13 @@
 </footer>
 <script src="vendor/electron_boilerplate/context_menu.js"></script>
 <script src="vendor/electron_boilerplate/external_links.js"></script>
-<script src="app.js"></script>
-<script src="js/jquery-2.1.4.min.js"></script>
+<script>
+    window.jQuery = window.$ = require('jquery');
+    window.Hammer = require('./js/hammer.min.js');
+</script>
 <script src="js/materialize.js"></script>
+
+<script src="app.js"></script>
 
 </body>
 </html>

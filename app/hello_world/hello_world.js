@@ -11,16 +11,38 @@ export var inputUsername = function () {
 export var getUsernames = function(arg){
     var test='';
     for(var k=0 ; k<arg.length;k++){
-        test+=('<li>'+arg[k].username+'</li>') ;
+        if(k == 0){
+            test+=('<p>Users :</p>');
+            test+=(arg[k].username) ;
+        }
+        else {
+            test+=(', ' + arg[k].username) ;
+        }
     }
     return test;
 };
 
-export var getGroupnames = function(arg){
+export var getGroupnames = function(groups){
     var test='';
-    for(var k=0 ; k<arg.length;k++){
-        test+=('<li><a href="#" id="'+k+'">' + arg[k].groupname + '</a>  -  <a href="#" class="delete" id="'+k+':d'+'">delete</a></li>') ;
-    }
+    groups.forEach(function(group){
+        test+=('<div class="col s12 m12" id="'+group._id+'">') ;
+        test+=('    <div class="card blue-grey darken-1">') ;
+        test+=('    <div class="card-content white-text">') ;
+        test+=('   <span class="card-title">' + group.groupname + '</span>') ;
+        test+=('<div id="'+group._id+':listsUser"></div>');
+        test+=('<p id="'+group._id+':addUser" ></p>');
+        test+=('    <div id="'+group._id+':listsUserForGroup"></div>');
+        test+=('</div>') ;
+        test+=('<div class="card-action">') ;
+        test+=('<a href="#" >View</a>') ;
+        test+=('<a href="#" class="delete" id="'+group._id+':d'+'">delete</a>') ;
+        test+=('<a class="waves-effect waves-light btn modal-trigger" id="test" href="#modal1">Share</a>') ;
+        test+=('</div>') ;
+        test+=('</div>') ;
+        test+=('</div>') ;
+
+        //test+=('<li><a href="#" id="'+k+'">' + arg[k].groupname + '</a>  -  <a href="#" class="delete" id="'+k+':d'+'">delete</a></li>') ;
+    })
     return test;
 };
 
