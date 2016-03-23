@@ -598,7 +598,9 @@ mb.on('ready', function ready() {
             console.log(data);
             data = JSON.parse(data);
 
-
+            groupDB.getGroup(groupInfos._id, function(groupInfos) {
+                sendGroupToServer(groupInfos);
+            });
             data.forEach(function(user){
                 userDB.getUser(function(me){
                     getUserIp(user._id, function(user_ip){
@@ -619,8 +621,6 @@ mb.on('ready', function ready() {
                         var client2 = new net.Socket();
 
                         groupDB.getGroup(groupInfos._id, function(groupInfos){
-                            console.log(groupInfos);
-                            sendGroupToServer(groupInfos);
 
                             client2.connect(user.port, user_ip.ip, function () {
                                 var group_json = {
