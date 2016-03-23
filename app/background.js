@@ -109,6 +109,37 @@ mb.on('ready', function ready() {
             post_req.end();
     }
 
+    function sendDeleteUserFromGroupToServer(groupId,userId){
+        var post_req  = null;
+        var post_data ='{"userId":"' + userId + '", "groupId":"' + groupId + '"}';
+        console.log(post_data)
+        var post_options = {
+            hostname: 'server-opensharing.rhcloud.com',
+            port    : '80',
+            path    : '/deleteUserFromGroup',
+            method  : 'POST',
+            headers : {
+                'Content-Type': 'application/json',
+                'Cache-Control': 'no-cache',
+                'Content-Length': post_data.length
+            }
+        };
+
+        post_req = http.request(post_options, function (res) {
+            res.setEncoding('utf8');
+            res.on('data', function (chunk) {
+                if(chunk)
+                    console.log("sendDeleteUserFromGroupToServer : "+ chunk);
+            });
+        });
+
+        post_req.on('error', function(e) {
+            console.log('problem while sendDeleteUserFromGroupToServer: ' + e.message);
+        });
+        post_req.write(post_data);
+        post_req.end();
+    }
+
     // Send New IP address to online server
     function sendIpToServer(){
         userDB.getUser(function (res) {
@@ -524,7 +555,6 @@ mb.on('ready', function ready() {
                                         sendGroupRequest(res, user_ip.ip,
                                             user_port);
                                     });
-
                                 }
                             });
                             event.sender.send('joinGroup', 'OK');
@@ -597,7 +627,6 @@ mb.on('ready', function ready() {
             data = data.toString();
             console.log(data);
             data = JSON.parse(data);
-
             groupDB.getGroup(groupInfos._id, function(groupInfos) {
                 sendGroupToServer(groupInfos);
             });
@@ -779,6 +808,7 @@ mb.on('ready', function ready() {
         if(group) {
             userDB.getUsers(group.users, function (users) {
                 userDB.getUser(function(me){
+                    sendDeleteUserFromGroupToServer(group._id,me._id);
                     users.forEach(function (user) {
                         if (user.me == 'false') {
                             getUserIp(user._id, function (user_ip) {
