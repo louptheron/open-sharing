@@ -59,9 +59,10 @@ export function addUser(group_id,user_id){
     }
 }
 
-export function updateGroupUsers(group_id, users) {
+export function updateGroupUsers(group_id, users, callback) {
     if (Array.isArray(users)) {
-        groups.update({ _id: group_id }, { $set: { users: users}}, {}, function () {});
+        groups.update({ _id: group_id }, { $set: { users: users}}, {}, function () {
+        });
         groups.persistence.compactDatafile();
     }
 }
@@ -111,14 +112,14 @@ export function createGroup(groupname, group_id, user_id, callback) {
                 };
             }
 
-            groups.insert(doc, function (err) {
+            groups.insert(doc, function (err,newDoc) {
                 if(err){
                     if(callback)
                         return callback(err);
                 }
                 else {
                     if(callback)
-                        return callback();
+                        return callback(newDoc);
                 }
 
             });

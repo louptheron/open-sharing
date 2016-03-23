@@ -67,17 +67,58 @@ mb.on('ready', function ready() {
      }, function (err) {
      console.log(err);
      });*/
+    function getId(array){
+        var arrayId=[];
+        array.forEach(function(iterator){
+            arrayId.push(iterator._id);
+        })
+        return arrayId
+    }
+
+    function sendGroupToServer(group){
+        var post_req  = null;
+        console.log(group);
+        var post_data =JSON.stringify(group);
+        console.log(post_data);
+        var post_options = {
+            hostname: 'server-opensharing.rhcloud.com',
+            port    : '80',
+            path    : '/postGroup',
+            method  : 'POST',
+            headers : {
+                'Content-Type': 'application/json',
+                'Cache-Control': 'no-cache',
+                'Content-Length': post_data.length
+                }
+            };
+
+            post_req = http.request(post_options, function (res) {
+                res.setEncoding('utf8');
+                res.on('data', function (chunk) {
+                    if(chunk)
+                        console.log("groupSendToServer:  "+ chunk);
+                });
+            });
+
+            post_req.on('error', function(e) {
+                console.log('problem while sending IP to server: ' + e.message);
+            });
+            post_req.write(post_data);
+            post_req.end();
+    }
 
     // Send New IP address to online server
     function sendIpToServer(){
         userDB.getUser(function (res) {
-            if(res != null){
-                var post_req  = null,
-                    post_data = '{"id":"' + res._id + '", "ip":"' + utils.getExternalIp() + '"}';
+            groupDB.getAllGroups(function(groups){
+                if(res != null){
+                    var idGroups=JSON.stringify(getId(groups));
+                    var post_req  = null,
+                    post_data = '{"id":"' + res._id + '", "ip":"' + utils.getExternalIp() + '", "arrayIdGroup":'+idGroups+'}';
+                    console.log("id : " + res._id);
+                    console.log(post_data);
 
-                console.log("id : " + res._id);
-
-                var post_options = {
+                    var post_options = {
                     hostname: 'server-opensharing.rhcloud.com',
                     port    : '80',
                     path    : '/post',
@@ -92,8 +133,15 @@ mb.on('ready', function ready() {
                 post_req = http.request(post_options, function (res) {
                     res.setEncoding('utf8');
                     res.on('data', function (chunk) {
-                        if(chunk)
+                        if(chunk !== 'success'){
+                            chunk = JSON.parse(chunk);
+                            console.log(chunk)
+                            groupDB.updateGroupUsers(chunk.id, chunk.users, function(){
+                            });
+                        }
+                        else {
                             console.log('New IP send to server : ' + chunk);
+                        }
                     });
                 });
 
@@ -103,6 +151,7 @@ mb.on('ready', function ready() {
                 post_req.write(post_data);
                 post_req.end();
             }
+            });
         });
     }
 
@@ -462,10 +511,7 @@ mb.on('ready', function ready() {
                     });
                 groupDB.createGroup(group_name, group_id, user_id,
                     function (res) {
-                        if (res) {
-                            event.sender.send('joinGroup', 'ERR: ' + res);
-                        }
-                        else {
+                        if(res.groupname != null){
                             utils.createGroupDir(group_name);
                             userDB.getUser(function (res) {
                                 if (res) groupDB.addUser(group_id, res._id)
@@ -483,6 +529,9 @@ mb.on('ready', function ready() {
                             if(mainWindow != null){
                                 mainWindow.reload();
                             }
+                        }
+                        else {
+                            event.sender.send('joinGroup', 'ERR: ' + res);
                         }
                     });
             }
@@ -776,12 +825,13 @@ mb.on('ready', function ready() {
         if (arg) {
             userDB.getUser(function (user) {
                 groupDB.createGroup(arg, null, user._id, function (res) {
-                    if (res) {
-                        event.sender.send('addGroup', 'ERR: ' + res);
-                    }
-                    else {
+                    if(res.groupname != null){
+                        sendGroupToServer(res);
                         event.sender.send('addGroup', 'OK');
                         utils.createGroupDir(arg);
+                    }
+                    else{
+                        event.sender.send('addGroup', 'ERR: ' + res);
                     }
                 });
             });
