@@ -46,7 +46,7 @@ function showMainPage(){
                     ipcRenderer.send('showGroup', group);
                     ipcRenderer.on('showGroup', function(event, msg) {
 
-                        document.getElementById('greet').innerHTML = '<p>Copy this secret phrase and send it to the friend you want to invite : </p><p>' + msg.secret + '</p>';
+                        document.getElementById('greet').innerHTML = '<p>Copy this secret phrase and send it to the friend you want to invite : </p>  <div class="chip">' + msg.secret + '</div>';
                         document.getElementById(msg.group_id+':listsUser').innerHTML = getUsernames(msg.users);
 
                         if(msg.noUsers.length==0){
@@ -58,18 +58,11 @@ function showMainPage(){
                             document.getElementById(msg.group_id+':listsUserForGroup').innerHTML = getChooseUsernames(msg.noUsers);
                             console.log(msg.noUsers)
 
-                            // TODO: Bug à corriger, affiche '0:u' à la place de l'id
-                            for(var i=0; i<msg.noUsers.length; i++){
-                                document.getElementById(msg.noUsers[i]._id+':u').onclick = function() {
-                                    ipcRenderer.send('addUserToGroup', msg.noUsers[i], msg.secret);
-                                };
-                            }
-                           /* msg.noUsers.forEach(function(user){
-                                var id = user._id;
-                                document.getElementById(id+':u').onclick = function() {
+                            msg.noUsers.forEach(function(user){
+                                document.getElementById(user._id+':u').onclick = function() {
                                     ipcRenderer.send('addUserToGroup', user, msg.secret);
                                 };
-                            });*/
+                            });
                         }
                     });
                 };

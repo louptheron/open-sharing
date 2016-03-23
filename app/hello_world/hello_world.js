@@ -57,8 +57,8 @@ export var getGroupnames = function(groups){
         test+=('</div>') ;
         test+=('<div class="card-action">') ;
         test+=('<a href="#">View</a>') ;
-        test+=('<a href="#" class="delete" id="'+group._id+':d'+'">delete</a>') ;
         test+=('<a class="waves-effect waves-light btn modal-trigger" id="test" href="#modal1">Share</a>') ;
+        test+=('<span class="right"><a href="#" class="delete" id="'+group._id+':d'+'"><i class="material-icons">&#xE872;</i></a></span>') ;
         test+=('</div>') ;
         test+=('</div>') ;
         test+=('</div>') ;
@@ -68,11 +68,16 @@ export var getGroupnames = function(groups){
     return test;
 };
 
-export var getChooseUsernames = function(arg){
+export var getChooseUsernames = function(users){
     var test='';
+    users.forEach(function(user){
+        test+=('<li><a href="#" id="'+user._id+':u'+'">' + user.username + '</a></li>') ;
+
+    });
+    /*
     for(var k=0 ; k<arg.length;k++){
         test+=('<li><a href="#" id="'+k+':u'+'">' + arg[k].username + '</a></li>') ;
-    }
+    }*/
     return test;
 };
 

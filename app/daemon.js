@@ -12,36 +12,36 @@ console.log('Loaded environment variables:', env);
 
 var app = remote.app;
 
-/*
-TODO:
-ADD ipc connection to background process which create the main windows when the user click ok the "Open App" button
- */
-
 document.addEventListener('DOMContentLoaded', function () {
 
-        if(document.getElementById('openApp') != null){
+    ipcRenderer.send('isWindowMinimised');
+    ipcRenderer.on('isWindowMinimised', function(event, res){
+        if(res == true){
             showApp()
-            function showApp(){
-                document.getElementById('openApp').innerHTML = 'Open App';
-                document.getElementById('openApp').onclick = function() {
-                    ipcRenderer.send('openApp');
-                    document.getElementById('openApp').id = 'hideApp';
-                    hideApp();
-                };
-            }
+        }
+        else {
+            hideApp()
+        }
+    });
 
-            function hideApp(){
-                document.getElementById('hideApp').innerHTML = 'Hide App';
-                document.getElementById('hideApp').onclick = function() {
-                    ipcRenderer.send('closeWindow');
-                    document.getElementById('hideApp').id = 'openApp';
-                    showApp();
-                };
-            }
-
-
-
-
+    //showApp()
+    function showApp(){
+        document.getElementById('openApp').innerHTML = 'Open App';
+        document.getElementById('openApp').onclick = function() {
+            ipcRenderer.send('openApp');
+            document.getElementById('openApp').id = 'hideApp';
+            hideApp();
+        };
     }
+
+    function hideApp(){
+        document.getElementById('hideApp').innerHTML = 'Hide App';
+        document.getElementById('hideApp').onclick = function() {
+            ipcRenderer.send('closeWindow');
+            document.getElementById('hideApp').id = 'openApp';
+            showApp();
+        };
+    }
+
 
 });

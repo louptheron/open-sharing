@@ -25,7 +25,7 @@ const crypto = require('crypto');
 // in config/env_xxx.json file.
 import env from './env';
 
-var menubarOptions = {width: 235, height: 36};
+var menubarOptions = {width: 225, height: 36};
 
 var mb = menubar(menubarOptions);
 var mainWindow;
@@ -680,6 +680,18 @@ mb.on('ready', function ready() {
     ipcMain.on('showWindow', function () {
         mainWindow.hide();
     });
+
+    ipcMain.on('isWindowMinimised', function (event) {
+        var isMinimized;
+        if(mainWindow != null){
+            isMinimized = mainWindow.isMinimized();
+        }
+        else {
+            isMinimized = true;
+        }
+        event.sender.send('isWindowMinimised', isMinimized);
+    });
+
 
     ipcMain.on('setUsername', function (event, arg) {
         if (arg) {
