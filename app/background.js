@@ -601,6 +601,7 @@ mb.on('ready', function ready() {
             groupDB.getGroup(groupInfos._id, function(groupInfos) {
                 sendGroupToServer(groupInfos);
             });
+
             data.forEach(function(user){
                 userDB.getUser(function(me){
                     getUserIp(user._id, function(user_ip){
