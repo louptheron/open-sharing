@@ -50,7 +50,7 @@ mb.on('ready', function ready() {
         console.log('create test entries in DB')
     }
 
-    var win = new BrowserWindow({ width: 400, height: 200, show: false });
+    var win = new BrowserWindow({ width: 300, height: 140, show: false});
     win.on('closed', function() {
         win = null;
     });
@@ -112,7 +112,6 @@ mb.on('ready', function ready() {
     function sendDeleteUserFromGroupToServer(groupId,userId){
         var post_req  = null;
         var post_data ='{"userId":"' + userId + '", "groupId":"' + groupId + '"}';
-        console.log(post_data)
         var post_options = {
             hostname: 'server-opensharing.rhcloud.com',
             port    : '80',
@@ -523,9 +522,17 @@ mb.on('ready', function ready() {
         win.hide();
     });
 
-    ipcMain.on('addUserToGroup',function(event,user,secretPhrase){
+    ipcMain.on('addUserToGroup',function(event, user, secretPhrase){
         getUserIp(user._id, function(user_ip){
-            askUserToJoinGroup( secretPhrase,user_ip.ip, user.port)
+            askUserToJoinGroup(secretPhrase, user_ip.ip, user.port,
+                function (res) {
+                    if(res !== null){
+                        if(res == 'not_connected'){
+                            console.log(res);
+                            event.sender.send('addUserToGroup', user.username + ' is offline, he has to be connected to receive invitation.');
+                        }
+                    }
+                })
         });
     });
 
@@ -582,10 +589,9 @@ mb.on('ready', function ready() {
         }
     }
 
-    function askUserToJoinGroup( secret,ip, port) {
+    function askUserToJoinGroup( secret, ip, port, callback) {
         var client = new net.Socket();
         client.connect(port, ip, function () {
-            console.log('Connected');
             var json = {
                 msgtype: 'ask_joinGroup',
                 secret: secret
@@ -596,12 +602,17 @@ mb.on('ready', function ready() {
         });
 
         client.on('close', function () {
-            console.log('Connection closed');
         });
 
-        client.on('error', function(err){
-            console.log("Error on askUserToJoinGroup: "+err.message);
-        })
+        client.on('error', function (err) {
+            if(err.code == 'ECONNREFUSED' || err.code == 'EHOSTUNREACH'){
+                if(callback)
+                    callback('not_connected');
+            }
+            else {
+                console.log("Error on askUserToJoinGroup: "+err.message);
+            }
+        });
     }
 
     function sendGroupRequest(groupInfos, ip, port) {
@@ -821,14 +832,13 @@ mb.on('ready', function ready() {
                                             user: me
                                         }
                                         var jsonString = JSON.stringify(json);
-
                                         client.write(jsonString, 'binary');
-                                        client.on('error', function (err) {
-                                            console.log('Error for sending delete_user_group socket : ' +
-                                                err);
-                                        });
-                                        client.destroy();
                                     });
+                                client.on('error', function (err) {
+                                    console.log('Error for sending delete_user_group socket : ' +
+                                        err);
+                                });
+                                client.destroy();
                             })
                         }
                     });

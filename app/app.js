@@ -46,7 +46,8 @@ function showMainPage(){
                     ipcRenderer.send('showGroup', group);
                     ipcRenderer.on('showGroup', function(event, msg) {
 
-                        document.getElementById('greet').innerHTML = '<p>Copy this secret phrase and send it to the friend you want to invite : </p>  <div class="chip">' + msg.secret + '</div>';
+                        document.getElementById('modal_content').innerHTML = '<p>Copy this secret phrase and send it to the friend you want to invite : </p>  <div class="chip">' + msg.secret + '</div>';
+                        document.getElementById('modal_title').innerHTML = 'Share';
                         document.getElementById(msg.group_id+':listsUser').innerHTML = getUsernames(msg.users);
 
                         if(msg.noUsers.length==0){
@@ -56,7 +57,6 @@ function showMainPage(){
                         else{
                             document.getElementById(msg.group_id+':addUser').innerHTML = '<p>Add an user : </p>';
                             document.getElementById(msg.group_id+':listsUserForGroup').innerHTML = getChooseUsernames(msg.noUsers);
-                            console.log(msg.noUsers)
 
                             msg.noUsers.forEach(function(user){
                                 document.getElementById(user._id+':u').onclick = function() {
@@ -67,6 +67,13 @@ function showMainPage(){
                     });
                 };
             })
+
+            ipcRenderer.on('addUserToGroup', function(event, msg){
+                document.getElementById('modal_content').innerHTML = '<p class="center-align"><i class="material-icons">&#xE002;</i></p><p>'+ msg +'</p>';
+                document.getElementById('modal_title').innerHTML = 'Share';
+                $('#modal1').openModal();
+            });
+
             $('.modal-trigger').leanModal({
                 dismissible: true, // Modal can be dismissed by clicking outside of the modal
                 in_duration: 300, // Transition in duration

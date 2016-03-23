@@ -1,9 +1,26 @@
 <html>
+<head>
+    <title>Open Sharing</title>
+    <link href="./css/materialize.css" rel="stylesheet" type="text/css">
+    <link href="./css/design.css" rel="stylesheet" type="text/css">
+    <link href="./css/fonts.css" rel="stylesheet" type="text/css">
+</head>
 <body>
-<p id="question"></p>
-<button id="no">No</button>
-<button id="yes">Yes</button>
-
+<div id="row">
+    <p class="center-align" id="question"></p>
+    <div class="center-align">
+        <a style="margin: 0 0 0 0;" class="waves-effect waves-light btn blue darken-1" id="yes"><i class="material-icons">&#xE876;</i></a>
+        <a style="margin: 0 0 0 0;" class="waves-effect waves-light btn grey darken-1" id="no"><i class="material-icons">&#xE14C;</i></a>
+    </div>
+</div>
+<script src="vendor/electron_boilerplate/context_menu.js"></script>
+<script src="vendor/electron_boilerplate/external_links.js"></script>
+<script>
+    window.jQuery = window.$ = require('jquery');
+    window.Hammer = require('./js/hammer.min.js');
+</script>
+<script src="js/materialize.js"></script>
 <script src="app.js"></script>
+
 </body>
 </html>

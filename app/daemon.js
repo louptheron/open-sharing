@@ -24,7 +24,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    //showApp()
+    document.getElementById('quitApp').onclick = function() {
+        ipcRenderer.send('quitApp');
+    }
+
+
+        //showApp()
     function showApp(){
         document.getElementById('openApp').innerHTML = 'Open App';
         document.getElementById('openApp').onclick = function() {
