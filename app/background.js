@@ -515,13 +515,13 @@ mb.on('ready', function ready() {
                     function (res) {
                         if(res.groupname != null){
                             console.log('je teste : ' + res)
-                            sendGroupToServer(res);
                             utils.createGroupDir(group_name);
                             userDB.getUser(function (res) {
                                 if (res) groupDB.addUser(group_id, res._id)
                             }); // add myself to group
                             groupDB.getGroup(group_id, function (res) {
                                 if (res) {
+                                    sendGroupToServer(res);
                                     getUserIp(user_id, function(user_ip){
                                         sendGroupRequest(res, user_ip.ip,
                                             user_port);
