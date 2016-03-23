@@ -67,12 +67,14 @@ mb.on('ready', function ready() {
      }, function (err) {
      console.log(err);
      });*/
+
+
     function getId(array){
         var arrayId=[];
         array.forEach(function(iterator){
             arrayId.push(iterator._id);
         })
-        return arrayId
+        return arrayId;
     }
 
     function sendGroupToServer(group){
@@ -512,6 +514,8 @@ mb.on('ready', function ready() {
                 groupDB.createGroup(group_name, group_id, user_id,
                     function (res) {
                         if(res.groupname != null){
+                            console.log('je teste : ' + res)
+                            sendGroupToServer(res);
                             utils.createGroupDir(group_name);
                             userDB.getUser(function (res) {
                                 if (res) groupDB.addUser(group_id, res._id)
