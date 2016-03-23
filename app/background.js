@@ -514,14 +514,12 @@ mb.on('ready', function ready() {
                 groupDB.createGroup(group_name, group_id, user_id,
                     function (res) {
                         if(res.groupname != null){
-                            console.log('je teste : ' + res)
                             utils.createGroupDir(group_name);
                             userDB.getUser(function (res) {
                                 if (res) groupDB.addUser(group_id, res._id)
                             }); // add myself to group
                             groupDB.getGroup(group_id, function (res) {
                                 if (res) {
-                                    sendGroupToServer(res);
                                     getUserIp(user_id, function(user_ip){
                                         sendGroupRequest(res, user_ip.ip,
                                             user_port);
@@ -601,7 +599,6 @@ mb.on('ready', function ready() {
             data = JSON.parse(data);
 
 
-
             data.forEach(function(user){
                 userDB.getUser(function(me){
                     getUserIp(user._id, function(user_ip){
@@ -622,6 +619,9 @@ mb.on('ready', function ready() {
                         var client2 = new net.Socket();
 
                         groupDB.getGroup(groupInfos._id, function(groupInfos){
+                            console.log(groupInfos);
+                            sendGroupToServer(groupInfos);
+
                             client2.connect(user.port, user_ip.ip, function () {
                                 var group_json = {
                                     msgtype: 'add_users',
