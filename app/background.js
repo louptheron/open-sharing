@@ -832,7 +832,6 @@ mb.on('ready', function ready() {
                             })
                         }
                     });
-
                 });
             });
 
