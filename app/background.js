@@ -138,7 +138,7 @@ mb.on('ready', function ready() {
     }
 
     // Send New IP address to online server
-    function sendIpToServer(){
+    function sendIpToServer(callback){
         userDB.getUser(function (res) {
             groupDB.getAllGroups(function(groups){
                 if(res != null){
@@ -168,6 +168,10 @@ mb.on('ready', function ready() {
                         }
                         else {
                             console.log('New IP send to server : ' + chunk);
+
+                            if(callback){
+                                callback();
+                            }
                         }
                     });
                 });
@@ -301,15 +305,15 @@ mb.on('ready', function ready() {
         });
     }
 
-    sendIpToServer();
-
-    // Get files from others users in the group
-    groupDB.getAllGroups(function (res) {
-        if (res) {
-            res.forEach(function (group) {
-                getFilesOnStartup(group, 0);
-            });
-        }
+    sendIpToServer(function(){
+        // Get files from others users in the group
+        groupDB.getAllGroups(function (res) {
+            if (res) {
+                res.forEach(function (group) {
+                    getFilesOnStartup(group, 0);
+                });
+            }
+        });
     });
 
     function sendFiles(json){
