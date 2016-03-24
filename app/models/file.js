@@ -45,6 +45,7 @@ export function removeFile(file_name, callback){
         else{
             return callback(err);
         }
+        file.persistence.compactDatafile();
     });
 }
 
@@ -57,6 +58,8 @@ export function removeChangedFlagOnFile(file_id){
 export function deleteFiles(group_id){
     file.remove({ group_id: group_id }, { multi: true }, function (err, numRemoved) {
         console.log(numRemoved + ' files removed.')
+        file.persistence.compactDatafile();
+
     });
 }
 
