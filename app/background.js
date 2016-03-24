@@ -862,6 +862,7 @@ mb.on('ready', function ready() {
                         sendGroupToServer(res);
                         event.sender.send('addGroup', 'OK');
                         utils.createGroupDir(arg);
+                        watchGroup(res);
                     }
                     else{
                         event.sender.send('addGroup', 'ERR: ' + res);
@@ -927,64 +928,68 @@ mb.on('ready', function ready() {
         });
     }
 
-    var watcher;
+    function watchGroup(group){
+        var watcher;
+        watcher = chokidar.watch(utils.getUserDir() + "/" +
+            group.groupname, {
+            ignored: /[\/\\]\./,
+            persistent: true
+        });
+        var log = console.log.bind(console);
+        // Add event listeners.
+        watcher
+            .on('add', function (path) {
+                var filename = path.split('/').pop();
+                fileDB.getFileWithGroupId(filename, group._id,
+                    function (res) {
+                        if (!res) {
+                            fileDB.addFile(filename, group._id
+                                , null, function (err) {
+                                    if (err)
+                                        console.log(err);
+                                    sendFileToGroup(path, group);
+                                });
+                        }
+                    });
+            })
+            .on('change', function (path) {
+                var filename = path.split('/').pop();
+                fileDB.getFileWithGroupId(filename, group._id,
+                    function (res) {
+                        if (res) {
+                            fileDB.getFile(res._id, function(res){
+                                if(res.changed == 'true'){
+                                    fileDB.removeChangedFlagOnFile(res._id);
+                                }
+                                else {
+                                    sendFileToGroup(path, group);
+                                }
+                            });
+                        }
+                    });
+            })
+            .on('unlink',function(path){
+                var res = path.split("/").pop();
+                fileDB.removeFile(res,function(err){
+                    if(err)
+                        console.log(err)
+                    else
+                        console.log(`file ${path} has been removed`)
+                })
+            })
+            .on('addDir',
+                path => log(`Directory ${path} has been added`))
+            .on('unlinkDir',
+                path => log(`Directory ${path} has been removed`))
+            .on('error', error => log(`Watcher error: ${error}`))
+            .on('ready',
+            () => log('Initial scan complete. Ready for changes'));
+    }
+
     groupDB.getAllGroups(function (res) {
         if (res) {
             res.forEach(function (group) {
-                watcher = chokidar.watch(utils.getUserDir() + "/" +
-                    group.groupname, {
-                    ignored: /[\/\\]\./,
-                    persistent: true
-                });
-                var log = console.log.bind(console);
-                // Add event listeners.
-                watcher
-                    .on('add', function (path) {
-                        var filename = path.split('/').pop();
-                        fileDB.getFileWithGroupId(filename, group._id,
-                            function (res) {
-                                if (!res) {
-                                    fileDB.addFile(filename, group._id
-                                        , null, function (err) {
-                                            if (err)
-                                                console.log(err);
-                                            sendFileToGroup(path, group);
-                                        });
-                                }
-                            });
-                    })
-                    .on('change', function (path) {
-                        var filename = path.split('/').pop();
-                        fileDB.getFileWithGroupId(filename, group._id,
-                            function (res) {
-                                if (res) {
-                                    fileDB.getFile(res._id, function(res){
-                                        if(res.changed == 'true'){
-                                            fileDB.removeChangedFlagOnFile(res._id);
-                                        }
-                                        else {
-                                            sendFileToGroup(path, group);
-                                        }
-                                    });
-                                }
-                            });
-                    })
-                    .on('unlink',function(path){
-                        var res = path.split("/").pop();
-                        fileDB.removeFile(res,function(err){
-                            if(err)
-                                console.log(err)
-                            else
-                                console.log(`file ${path} has been removed`)
-                        })
-                    })
-                    .on('addDir',
-                        path => log(`Directory ${path} has been added`))
-                    .on('unlinkDir',
-                        path => log(`Directory ${path} has been removed`))
-                    .on('error', error => log(`Watcher error: ${error}`))
-                    .on('ready',
-                    () => log('Initial scan complete. Ready for changes'));
+                watchGroup(group)
             })
         }
 
