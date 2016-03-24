@@ -79,9 +79,7 @@ mb.on('ready', function ready() {
 
     function sendGroupToServer(group){
         var post_req  = null;
-        console.log(group);
         var post_data =JSON.stringify(group);
-        console.log(post_data);
         var post_options = {
             hostname: 'server-opensharing.rhcloud.com',
             port    : '80',
@@ -147,8 +145,6 @@ mb.on('ready', function ready() {
                     var idGroups=JSON.stringify(getId(groups));
                     var post_req  = null,
                     post_data = '{"id":"' + res._id + '", "ip":"' + utils.getExternalIp() + '", "arrayIdGroup":'+idGroups+'}';
-                    console.log("id : " + res._id);
-                    console.log(post_data);
 
                     var post_options = {
                     hostname: 'server-opensharing.rhcloud.com',
@@ -167,7 +163,6 @@ mb.on('ready', function ready() {
                     res.on('data', function (chunk) {
                         if(chunk !== 'success'){
                             chunk = JSON.parse(chunk);
-                            console.log(chunk)
                             groupDB.updateGroupUsers(chunk.id, chunk.users, function(){
                             });
                         }
@@ -256,7 +251,6 @@ mb.on('ready', function ready() {
                                         client.destroy();
                                     }
                                     else {
-                                        console.log('test')
                                         files.forEach(function(file) {
                                             var path = utils.getUserDir() + '/' + group.groupname + '/' + file.filename;
                                             fs.readFile(path, function (err, data) {
@@ -436,7 +430,6 @@ mb.on('ready', function ready() {
     net.createServer(function(socket) {
         socket.on('data', function (data) {
             data = data.toString();
-            console.log(data);
             var json = JSON.parse(data)
 
             switch (json.msgtype) {
@@ -453,7 +446,6 @@ mb.on('ready', function ready() {
                     groupDB.updateGroupUsers(json.group_id, json.arrayUsers, function(){});
                     break;
                 case 'delete_user_group':
-                    console.log(json.group_id + json.user._id)
                     groupDB.removeUser(json.group_id, json.user._id, function(){})
                     if(mainWindow != null){
                         mainWindow.reload();
@@ -483,7 +475,6 @@ mb.on('ready', function ready() {
                     groupDB.getGroup(json.group._id, function (res) {
                         if (res) {
                             userDB.getUsers(res.users, function (data) {
-                                console.log(data);
                                 var str = JSON.stringify(data);
                                 socket.write(str, 'binary');
 
@@ -498,7 +489,6 @@ mb.on('ready', function ready() {
                     break;
 
                 case 'ask_joinGroup':
-                    console.log(json.secret);
                     win.loadURL('file://' + __dirname + '/joinGroup.html');
                     win.webContents.on('did-finish-load', function() {
                         win.webContents.send('askJoinGroup', json.secret);
@@ -528,7 +518,6 @@ mb.on('ready', function ready() {
                 function (res) {
                     if(res !== null){
                         if(res == 'not_connected'){
-                            console.log(res);
                             event.sender.send('addUserToGroup', user.username + ' is offline, he has to be connected to receive invitation.');
                         }
                     }
@@ -618,7 +607,6 @@ mb.on('ready', function ready() {
     function sendGroupRequest(groupInfos, ip, port) {
         var client = new net.Socket();
         client.connect(port, ip, function () {
-            console.log('Connected');
             userDB.getUser(function (user) {
                 var json = {
                     msgtype: 'group_joined',
@@ -636,7 +624,6 @@ mb.on('ready', function ready() {
 
         client.on('data', function (data) {
             data = data.toString();
-            console.log(data);
             data = JSON.parse(data);
             groupDB.getGroup(groupInfos._id, function(groupInfos) {
                 sendGroupToServer(groupInfos);
@@ -645,7 +632,6 @@ mb.on('ready', function ready() {
             data.forEach(function(user){
                 userDB.getUser(function(me){
                     getUserIp(user._id, function(user_ip){
-                        console.log('haha' + user.port + user_ip.ip)
 
                         userDB.createUser(user.username,
                             user.port, "false", user._id, function (res) {
@@ -848,7 +834,7 @@ mb.on('ready', function ready() {
 
             fileDB.deleteFiles(group._id);
             groupDB.removeGroup(group._id, function(){
-                console.log('test')
+
             });
             const exec = require('child_process').exec;
             const child = exec('cd ' + utils.getUserDir() + '; rm -r ' + group.groupname,
@@ -980,7 +966,6 @@ mb.on('ready', function ready() {
                                             sendFileToGroup(path, group);
                                         }
                                     });
-                                    console.log('jenvoie !!')
                                 }
                             });
                     })
