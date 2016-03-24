@@ -37,8 +37,8 @@ export function deleteDB(){
     });
 }
 
-export function removeFile(file_id, callback){
-    file.remove({ _id: file_id }, {}, function (err) {
+export function removeFile(file_name, callback){
+    file.remove({ filename: file_name }, {}, function (err) {
         if(!err){
             return callback();
         }
