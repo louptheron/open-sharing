@@ -349,7 +349,7 @@ mb.on('ready', function ready() {
                         var response_json = {
                             msgtype: 'add_file',
                             file: fileInDb,
-                            data: data,
+                            file_data: data.toString(),
                             groupname: json.groupname
                         };
                         var jsonString = JSON.stringify(response_json);
@@ -506,6 +506,43 @@ mb.on('ready', function ready() {
                     });
                     groupDB.addUser(json.group._id, json.user._id, function () {
                     });
+
+                    fileDB.getGroupFiles(json.group._id, function(files) {
+                        files.forEach(function(fileInDb) {
+                            console.log(fileInDb)
+                            var path = utils.getUserDir() + '/' + json.group.groupname + '/' + fileInDb.filename;
+                            fs.readFile(path, function (err, data) {
+                                if (err) {
+                                    console.log(err)
+                                }
+                                else {
+                                    var response_json = {
+                                        msgtype: 'add_file',
+                                        file: fileInDb,
+                                        file_data: data.toString(),
+                                        groupname: json.group.groupname
+                                    };
+                                    var jsonString = JSON.stringify(response_json);
+
+                                        getUserIp(json.user._id, function(user_ip){
+                                            var client = new net.Socket();
+                                            client.connect(json.user.port,
+                                                user_ip.ip, function () {
+                                                    client.write(jsonString,
+                                                        'binary');
+                                                    client.on('error',
+                                                        function (err) {
+                                                            console.log("Error while sending files to new user : " +
+                                                                err.message);
+                                                        })
+                                                    client.destroy();
+                                                });
+                                        })
+                                }
+                            });
+                        });
+                    });
+
                     if(mainWindow != null){
                         mainWindow.reload();
                     }
