@@ -991,6 +991,7 @@ mb.on('ready', function ready() {
     });
 });
 
+
 app.on('window-all-closed', function () {
     app.quit();
 });
