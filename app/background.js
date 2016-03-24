@@ -458,7 +458,7 @@ mb.on('ready', function ready() {
                     sendFiles(json);
                     break;
                 case 'add_file':
-                    var file_data = new Buffer(json.data.data);
+                    var file_data = new Buffer(json.data.data, 'base64');
                     fileDB.addFile(json.file.filename, json.file.group_id, json.file._id,
                         function (res) {
                             console.log(res);
@@ -899,11 +899,10 @@ mb.on('ready', function ready() {
                 var json = {
                     msgtype: 'add_file',
                     file: file,
-                    data: data,
+                    data: data.toString("base64"),
                     groupname: group.groupname
                 };
                 var jsonString = JSON.stringify(json);
-
                 userDB.getUsers(group.users, function (users) {
                     users.forEach(function (user) {
                         getUserIp(user._id, function(user_ip){
