@@ -458,12 +458,22 @@ mb.on('ready', function ready() {
                     sendFiles(json);
                     break;
                 case 'add_file':
-                    var file_data = new Buffer(json.data.data, 'base64');
                     fileDB.addFile(json.file.filename, json.file.group_id, json.file._id,
                         function (res) {
                             console.log(res);
                         });
-                    fs.writeFile(utils.getUserDir() + '/' + json.groupname + '/' + json.file.filename, file_data.toString());
+
+                    net.createServer(function(socket) {
+                        socket.on('data', function (data) {
+                            var file_data = new Buffer(json.data.data, 'base64');
+                            console.log(data)
+                            fs.writeFile(utils.getUserDir() + '/' + json.groupname + '/' + json.file.filename, file_data);
+                        });
+                        socket.on('error', function(err){
+                            console.log("Error creating server : "+err.message);
+                        })
+                    }).listen(1338, utils.getExternalIp());
+
                     break;
                 case 'group_joined':
                     userDB.createUser(json.user.username,
@@ -896,20 +906,28 @@ mb.on('ready', function ready() {
         var filename = path.split('/').pop();
         fileDB.getFileWithGroupId(filename, group._id, function (file) {
             fs.readFile(path, function (err, data) {
-                var json = {
-                    msgtype: 'add_file',
-                    file: file,
-                    data: data.toString("base64"),
-                    groupname: group.groupname
-                };
-                var jsonString = JSON.stringify(json);
+
                 userDB.getUsers(group.users, function (users) {
                     users.forEach(function (user) {
                         getUserIp(user._id, function(user_ip){
                             if (user.me == 'false' && user_ip.ip != null && user.port != null) {
+
+                                var json = {
+                                    msgtype: 'add_file',
+                                    file: file,
+                                    groupname: group.groupname
+                                };
+                                var jsonString = JSON.stringify(json);
                                 var client = new net.Socket();
                                 client.connect(user.port, user_ip.ip, function () {
                                     client.write(jsonString, 'binary');
+                                    client.destroy();
+                                });
+
+                                var file_data = new Buffer(data).toString('base64');
+                                var clientForFile = new net.Socket();
+                                clientForFile.connect(1338, user_ip.ip, function () {
+                                    client.write(file_data, 'binary');
                                     client.destroy();
                                 });
 
@@ -917,6 +935,13 @@ mb.on('ready', function ready() {
                                 });
 
                                 client.on('error', function (err) {
+                                    console.log('Error for sending file informations : ' + err);
+                                });
+
+                                clientForFile.on('close', function () {
+                                });
+
+                                clientForFile.on('error', function (err) {
                                     console.log('Error for sending file : ' + err);
                                 });
                             }
