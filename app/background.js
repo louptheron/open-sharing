@@ -279,7 +279,6 @@ mb.on('ready', function ready() {
                             });
 
                             client.on('close', function () {
-                                console.log('Connection closed');
                             });
 
                             client.on('error', function (err) {
@@ -823,12 +822,12 @@ mb.on('ready', function ready() {
                                         }
                                         var jsonString = JSON.stringify(json);
                                         client.write(jsonString, 'binary');
+                                        client.destroy();
                                     });
                                 client.on('error', function (err) {
                                     console.log('Error for sending delete_user_group socket : ' +
                                         err);
                                 });
-                                client.destroy();
                             })
                         }
                     });
@@ -911,13 +910,11 @@ mb.on('ready', function ready() {
                             if (user.me == 'false' && user_ip.ip != null && user.port != null) {
                                 var client = new net.Socket();
                                 client.connect(user.port, user_ip.ip, function () {
-                                    console.log('Connected');
                                     client.write(jsonString, 'binary');
                                     client.destroy();
                                 });
 
                                 client.on('close', function () {
-                                    console.log('Connection closed');
                                 });
 
                                 client.on('error', function (err) {
